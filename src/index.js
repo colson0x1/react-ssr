@@ -1,3 +1,9 @@
+// React SSR
+/* @ Server Side Rendering (SSR)
+ * @ Isomorphic React
+ * @ Universal JavaScript
+ **/
+
 // CommonJS module syntax or the `require` syntax
 
 /* @ ReactDOM */
@@ -19,11 +25,32 @@
 // statements before you run any code at all, Webpack will go through and
 // build a bundle with all of our different modules included into it!
 
+// When we run Webpack on the server, it spits out a compiled or transpiled
+// JavaScript file that contains not only all of our server code but all of
+// the React components inside of our application as well.
+
+// Probelm I: JSX on the server
+// Solution: Webpack and Babel
+// With traditional React Apps, we normally have a bunch of JavaScript files
+// to run all of our server side code and then a bunch of JavaScript files for
+// our client side project.
+// With Server Side Rendering (SSR), however, that all gets combined into one
+// single application that contains both our Client and our Sever logic.
+// So that is how we are able to render the client application on the server.
+
+// Probelm II: Need to turn components into HTML
+// Normally we use ReactDOM library's render function to take a component and
+// mount it into a specifice DOM node on the server.
+// On the server, we use the renderToString function to take a bunch of
+// components and turn them into raw HTML.
+// This renders all of our React Components exactly one time, builds an HTML
+// strucuture out of them and then sends the result down to our browser.
+
 const express = require('express');
 // Making ES2015 modules (React, renderToStrinf, Home) works nicely
 // with CommonJS module system
 const React = require('react');
-const renderToString = require('react-dom/server').renderToString();
+const renderToString = require('react-dom/server').renderToString;
 const Home = require('./client/components/Home').default;
 const app = express();
 
