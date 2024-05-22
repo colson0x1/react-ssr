@@ -109,6 +109,44 @@
 // We want to do that to use the exact same coding style on both the React
 // specific code and on our Server Side code (Express) as well
 
+// @ Ignore files with Webpack
+// When Webpack sees import statement example files or libraries like React,
+// ReactDOM.. it  will go and grab all of the code that represents that module
+// and pull that entire library into the output bundle.
+// This is the behavior we want Webpack to work with browser applications but
+// not with sever. So for browser based applications, we definitely want
+// Webpack to behave in that fashion. We want Webpack to copy that entire library
+// into the Bundle.js file because one of the big goals of Webpack on the
+// browser is to condense down all of our assets into one single file.
+//
+// But on the server, which is where we are running this file here, that's a
+// little bit of a different story.
+// So here's what's happening on the Bundle. So on Server Side Webpack process
+// that we're running.
+// Our server bundle is importing Express, React and ReactDOM which means that
+// when Webpack runs for our server process, it copies the source code, the
+// entire source code of Express, React and ReactDOM into our output bundle.js
+// file. This is not actually required because with NODE, unlike the browser,
+// with NODE, we can require NODE modules at runtime when our server first
+// starts up!!
+//
+// This isn't a big deal like it's not the worst thing in the world to be requiring
+// these modules into the final bundle.js file because we are not shipping this
+// server side bundle anywhere like we are with the browser. So we're not super
+// concerned with the size of the server bundle at all. So The size of that
+// file, not a big deal!
+//
+// BUT if we do reduce the number of libraries that needs to be placed into
+// that bundle file on the Server Side, we'll end up with a faster webpack
+// process, particularly during the initial startup Webpack run.
+// So not a big deal
+// BUT if our application starts to grow to be really large in size on the server,
+// we can definately shave off a couple of seconds here from the initial Webpack
+// startup time!!
+// It's not the worst thing in the world.
+// Hence, its good to keep Webpack from importing our libraries into our
+// server bundle.
+
 /*
 const express = require('express');
 // Making ES2015 modules (React, renderToStrinf, Home) works nicely

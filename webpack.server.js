@@ -1,6 +1,7 @@
 const path = require('path');
 const merge = require('webpack-merge');
 const baseConfig = require('./webpack.base.js');
+const webpackNodeExternals = require('webpack-node-externals');
 
 const config = {
   // Inform webpack that we're building a bundle for NODEjs, rahter than for the
@@ -25,6 +26,13 @@ const config = {
     // created by Webpack when it runs
     path: path.resolve(__dirname, 'build'),
   },
+
+  // This rule right here is going to tell Webpack to NOT bundle any libraries
+  // into our output bundle on the server if that library exists inside the
+  // node modules folder.
+  // So anything that's inside the node modules folder will not be included
+  // inside of our server side bundle.
+  externals: [webpackNodeExternals()],
 };
 
 module.exports = merge(baseConfig, config);
