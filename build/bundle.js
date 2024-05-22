@@ -7153,6 +7153,16 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 // This renders all of our React Components exactly one time, builds an HTML
 // strucuture out of them and then sends the result down to our browser.
 
+/* @ Two Bundle by Webpack
+ * We've now two separate bundles. One for server and one for client.
+ * However, the client bundle is still not actually getting downloaded by
+ * the browser when someone accesses our root ('/') route.
+ * To make sure that our browser attempts to actually pick up that newly
+ * created client side bundle. We'll first open all the folders on the public
+ * directory to the outside world by telling Express to treat this public
+ * directory as a freely available public directory.
+ * */
+
 // Webpack allows us to use ES2015 modules on our front end code.
 // So because our server files are being handled by Webpack, we can now make
 // use of ES2015 modules on our server side code as well.
@@ -7170,10 +7180,16 @@ const Home = require('./client/components/Home').default;
 
 var app = (0, _express2.default)();
 
+// This tells express that it needs to treat that public directory as a static
+// or public directory that is available to the outside world.
+app.use(_express2.default.static('public'));
+
 app.get('/', function (req, res) {
   var content = (0, _server.renderToString)(_react2.default.createElement(_Home2.default, null));
 
-  res.send(content);
+  var html = '\n    <html>\n      <head></head>\n      <body>\n        <div>' + content + '</div>\n        <script src=\'bundle.js\'></script>\n      </body>\n    </html>\n  ';
+
+  res.send(html);
 });
 
 app.listen(3000, function () {
