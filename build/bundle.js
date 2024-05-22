@@ -86,6 +86,26 @@ var _renderer2 = _interopRequireDefault(_renderer);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+var app = (0, _express2.default)();
+
+// This tells express that it needs to treat that public directory as a static
+// or public directory that is available to the outside world.
+app.use(_express2.default.static('public'));
+
+// Now whenever a request comes in, we call the render function. AND then
+// we attempt to render our Home Component to a string, stick it into our
+// HTML template and then return the entire thing.
+// And the result all gets sent back to whoever made this initial request here.
+app.get('/', function (req, res) {
+  res.send((0, _renderer2.default)());
+});
+
+app.listen(3000, function () {
+  console.log('Listening on port 3000');
+});
+
+/* @ src/index.js (Server Side Code) */
+
 // React SSR
 /* @ Server Side Rendering (SSR)
  * - Generates HTML on the server
@@ -262,23 +282,28 @@ const renderToString = require('react-dom/server').renderToString;
 const Home = require('./client/components/Home').default;
 */
 
-var app = (0, _express2.default)();
+/*
+import express from 'express';
+import renderer from './helpers/renderer';
+
+const app = express();
 
 // This tells express that it needs to treat that public directory as a static
 // or public directory that is available to the outside world.
-app.use(_express2.default.static('public'));
+app.use(express.static('public'));
 
 // Now whenever a request comes in, we call the render function. AND then
 // we attempt to render our Home Component to a string, stick it into our
 // HTML template and then return the entire thing.
 // And the result all gets sent back to whoever made this initial request here.
-app.get('/', function (req, res) {
-  res.send((0, _renderer2.default)());
+app.get('/', (req, res) => {
+  res.send(renderer());
 });
 
-app.listen(3000, function () {
+app.listen(3000, () => {
   console.log('Listening on port 3000');
 });
+*/
 
 /***/ }),
 /* 2 */

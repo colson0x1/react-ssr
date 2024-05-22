@@ -1,3 +1,26 @@
+import express from 'express';
+import renderer from './helpers/renderer';
+
+const app = express();
+
+// This tells express that it needs to treat that public directory as a static
+// or public directory that is available to the outside world.
+app.use(express.static('public'));
+
+// Now whenever a request comes in, we call the render function. AND then
+// we attempt to render our Home Component to a string, stick it into our
+// HTML template and then return the entire thing.
+// And the result all gets sent back to whoever made this initial request here.
+app.get('/', (req, res) => {
+  res.send(renderer());
+});
+
+app.listen(3000, () => {
+  console.log('Listening on port 3000');
+});
+
+/* @ src/index.js (Server Side Code) */
+
 // React SSR
 /* @ Server Side Rendering (SSR)
  * - Generates HTML on the server
@@ -174,6 +197,7 @@ const renderToString = require('react-dom/server').renderToString;
 const Home = require('./client/components/Home').default;
 */
 
+/*
 import express from 'express';
 import renderer from './helpers/renderer';
 
@@ -194,3 +218,4 @@ app.get('/', (req, res) => {
 app.listen(3000, () => {
   console.log('Listening on port 3000');
 });
+*/
