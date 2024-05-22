@@ -26,6 +26,19 @@
  * React application and have the React application set up all the event handlers
  * and action creators and data loading requests and all that kind of stuff that
  * we normally want to have occur inside of our application.
+ *
+ * Solution to that Pain Point:
+ * Create two JavaScript bundles using Webpack. One bundle is going to contain
+ * all of our server side and client side code i.e our current setup
+ * webpack.server.js AND now we create another bundle for React app which will
+ * be shipped down to the users browser.
+ * The reason we want to have two bundles is our Server Side bundle and the
+ * Server Side code inside of it might contain sensitive information or sensitive
+ * code. For example, it might contain some secret API keys or special logic
+ * that could somehow be exploited. So there's going to be some amount of code on
+ * our server that we never want to ship down to the browser.
+ * So to implement this, we are going to set up a second Webpack pipeline that's
+ * going to run right along side our current one.
  */
 
 import React from 'react';
