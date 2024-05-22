@@ -147,6 +147,24 @@
 // Hence, its good to keep Webpack from importing our libraries into our
 // server bundle.
 
+/* @ Render Helper
+ * This refactor is going to seem small right now. But as soon as we start to
+ * add in technologies like React Router, Redux and some other stuff, this
+ * refactor is really going to pay off.
+ * Inside of our index.js file, we appear to be locating every last scrap of
+ * server side rendering logic inside this file right now. That's definitely
+ * okay for now, but eventually we expect this route handler right here to
+ * start to dramatically grow in size.
+ * So to keep this file from getting too large, we should split out the logic
+ * that renders our React app off to a separate file.
+ * Right now, it's not going to be an immediate big difference. But as time
+ * goes on, this separation of logic is going to really help to add clarity to
+ * our server process.
+ *
+ * This definitely helps to separate out this Express related logic right here
+ * from the actual server side rendering and React logic.
+ * */
+
 /*
 const express = require('express');
 // Making ES2015 modules (React, renderToStrinf, Home) works nicely
@@ -157,9 +175,7 @@ const Home = require('./client/components/Home').default;
 */
 
 import express from 'express';
-import React from 'react';
-import { renderToString } from 'react-dom/server';
-import Home from './client/components/Home';
+import renderer from './helpers/renderer';
 
 const app = express();
 
@@ -167,20 +183,12 @@ const app = express();
 // or public directory that is available to the outside world.
 app.use(express.static('public'));
 
+// Now whenever a request comes in, we call the render function. AND then
+// we attempt to render our Home Component to a string, stick it into our
+// HTML template and then return the entire thing.
+// And the result all gets sent back to whoever made this initial request here.
 app.get('/', (req, res) => {
-  const content = renderToString(<Home />);
-
-  const html = `
-    <html>
-      <head></head>
-      <body>
-        <div id='root'>${content}</div>
-        <script src='bundle.js'></script>
-      </body>
-    </html>
-  `;
-
-  res.send(html);
+  res.send(renderer());
 });
 
 app.listen(3000, () => {

@@ -80,15 +80,9 @@ var _express = __webpack_require__(2);
 
 var _express2 = _interopRequireDefault(_express);
 
-var _react = __webpack_require__(0);
+var _renderer = __webpack_require__(5);
 
-var _react2 = _interopRequireDefault(_react);
-
-var _server = __webpack_require__(3);
-
-var _Home = __webpack_require__(4);
-
-var _Home2 = _interopRequireDefault(_Home);
+var _renderer2 = _interopRequireDefault(_renderer);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -241,6 +235,24 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 // Hence, its good to keep Webpack from importing our libraries into our
 // server bundle.
 
+/* @ Render Helper
+ * This refactor is going to seem small right now. But as soon as we start to
+ * add in technologies like React Router, Redux and some other stuff, this
+ * refactor is really going to pay off.
+ * Inside of our index.js file, we appear to be locating every last scrap of
+ * server side rendering logic inside this file right now. That's definitely
+ * okay for now, but eventually we expect this route handler right here to
+ * start to dramatically grow in size.
+ * So to keep this file from getting too large, we should split out the logic
+ * that renders our React app off to a separate file.
+ * Right now, it's not going to be an immediate big difference. But as time
+ * goes on, this separation of logic is going to really help to add clarity to
+ * our server process.
+ *
+ * This definitely helps to separate out this Express related logic right here
+ * from the actual server side rendering and React logic.
+ * */
+
 /*
 const express = require('express');
 // Making ES2015 modules (React, renderToStrinf, Home) works nicely
@@ -256,12 +268,12 @@ var app = (0, _express2.default)();
 // or public directory that is available to the outside world.
 app.use(_express2.default.static('public'));
 
+// Now whenever a request comes in, we call the render function. AND then
+// we attempt to render our Home Component to a string, stick it into our
+// HTML template and then return the entire thing.
+// And the result all gets sent back to whoever made this initial request here.
 app.get('/', function (req, res) {
-  var content = (0, _server.renderToString)(_react2.default.createElement(_Home2.default, null));
-
-  var html = '\n    <html>\n      <head></head>\n      <body>\n        <div id=\'root\'>' + content + '</div>\n        <script src=\'bundle.js\'></script>\n      </body>\n    </html>\n  ';
-
-  res.send(html);
+  res.send((0, _renderer2.default)());
 });
 
 app.listen(3000, function () {
@@ -354,6 +366,36 @@ var Home = function Home() {
  */
 
 exports.default = Home;
+
+/***/ }),
+/* 5 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _react = __webpack_require__(0);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _server = __webpack_require__(3);
+
+var _Home = __webpack_require__(4);
+
+var _Home2 = _interopRequireDefault(_Home);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = function () {
+  var content = (0, _server.renderToString)(_react2.default.createElement(_Home2.default, null));
+
+  return '\n    <html>\n      <head></head>\n      <body>\n        <div id=\'root\'>' + content + '</div>\n        <script src=\'bundle.js\'></script>\n      </body>\n    </html>\n  ';
+}; // This file is going to house a function that will simply render our React
+// app and return it as a string
 
 /***/ })
 /******/ ]);
