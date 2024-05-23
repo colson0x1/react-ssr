@@ -5,7 +5,8 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Home from './components/Home';
+import { BrowserRouter } from 'react-router-dom';
+import Routes from './Routes';
 
 // Really important distinction here is that, When this code right here is
 // executed on the browser side, there is already content inside of that div
@@ -24,4 +25,9 @@ import Home from './components/Home';
 /* ReactDOM.render(<Home />, document.querySelector('#root')); */
 // Resolve that warning with ReactDOM.hydate to rehydrate our application on the
 // browser.
-ReactDOM.hydrate(<Home />, document.querySelector('#root'));
+ReactDOM.hydrate(
+  <BrowserRouter>
+    <Routes />
+  </BrowserRouter>,
+  document.querySelector('#root'),
+);

@@ -86,6 +86,12 @@ var _renderer2 = _interopRequireDefault(_renderer);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+// @ React Router DOM
+// Server - StaticRouter
+// -> For use when doing SSR
+// Client - BrowserRouter
+// -> For use when running in a browser
+
 var app = (0, _express2.default)();
 
 // This tells express that it needs to treat that public directory as a static

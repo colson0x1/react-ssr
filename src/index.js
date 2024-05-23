@@ -1,6 +1,12 @@
 import express from 'express';
 import renderer from './helpers/renderer';
 
+// @ React Router DOM
+// Server - StaticRouter
+// -> For use when doing SSR
+// Client - BrowserRouter
+// -> For use when running in a browser
+
 const app = express();
 
 // This tells express that it needs to treat that public directory as a static
