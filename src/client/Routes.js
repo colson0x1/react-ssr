@@ -9,7 +9,6 @@ export default () => {
   return (
     <div>
       <Route exact path='/' component={Home} />
-      <Route path='/sup' component={() => 'Sup'} />
     </div>
   );
 };

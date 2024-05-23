@@ -6,7 +6,12 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter } from 'react-router-dom';
+import { createStore, applyMiddleware } from 'redux';
+import thunk from 'redux-thunk';
+import { Provider } from 'react-redux';
 import Routes from './Routes';
+
+const store = createStore(reducers, {}, applyMiddleware(thunk));
 
 // Really important distinction here is that, When this code right here is
 // executed on the browser side, there is already content inside of that div
@@ -26,8 +31,10 @@ import Routes from './Routes';
 // Resolve that warning with ReactDOM.hydate to rehydrate our application on the
 // browser.
 ReactDOM.hydrate(
-  <BrowserRouter>
-    <Routes />
-  </BrowserRouter>,
+  <Provider store={store}>
+    <BrowserRouter>
+      <Routes />
+    </BrowserRouter>
+  </Provider>,
   document.querySelector('#root'),
 );
