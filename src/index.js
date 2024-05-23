@@ -18,7 +18,7 @@ app.use(express.static('public'));
 // HTML template and then return the entire thing.
 // And the result all gets sent back to whoever made this initial request here.
 app.get('/', (req, res) => {
-  res.send(renderer());
+  res.send(renderer(req));
 });
 
 app.listen(3000, () => {
