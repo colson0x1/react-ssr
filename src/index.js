@@ -17,7 +17,16 @@ app.use(express.static('public'));
 // we attempt to render our Home Component to a string, stick it into our
 // HTML template and then return the entire thing.
 // And the result all gets sent back to whoever made this initial request here.
-app.get('/', (req, res) => {
+
+/* @ Handle all Routes */
+// Tell Express to watch absolutely any routes inside of our application
+// And if any requests comes in regardless of what route its looking for, we're
+// just going to pass it off to React Router and allow React Router to
+// deal with it
+// So now no matter what, Express is always going to pass incoming request
+// to our renderer which is going to pass the request on to React Router and
+// allow that to decide what to do with it
+app.get('*', (req, res) => {
   res.send(renderer(req));
 });
 

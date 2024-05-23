@@ -102,7 +102,16 @@ app.use(_express2.default.static('public'));
 // we attempt to render our Home Component to a string, stick it into our
 // HTML template and then return the entire thing.
 // And the result all gets sent back to whoever made this initial request here.
-app.get('/', function (req, res) {
+
+/* @ Handle all Routes */
+// Tell Express to watch absolutely any routes inside of our application
+// And if any requests comes in regardless of what route its looking for, we're
+// just going to pass it off to React Router and allow React Router to
+// deal with it
+// So now no matter what, Express is always going to pass incoming request
+// to our renderer which is going to pass the request on to React Router and
+// allow that to decide what to do with it
+app.get('*', function (req, res) {
   res.send((0, _renderer2.default)(req));
 });
 
@@ -471,7 +480,10 @@ exports.default = function () {
   return _react2.default.createElement(
     'div',
     null,
-    _react2.default.createElement(_reactRouterDom.Route, { exact: true, path: '/', component: _Home2.default })
+    _react2.default.createElement(_reactRouterDom.Route, { exact: true, path: '/', component: _Home2.default }),
+    _react2.default.createElement(_reactRouterDom.Route, { path: '/sup', component: function component() {
+        return 'Sup';
+      } })
   );
 }; // This is a file that's going to be shared between both the client and the
 // server side codebases.
