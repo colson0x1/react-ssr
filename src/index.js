@@ -1,3 +1,4 @@
+import 'babel-polyfill';
 import express from 'express';
 import renderer from './helpers/renderer';
 import createStore from './helpers/createStore';
@@ -9,6 +10,21 @@ import createStore from './helpers/createStore';
 // -> For use when running in a browser
 
 const app = express();
+
+// @ Uncaught ReferenceError: regeneratorRuntime is not defined!
+// That error message is due to our use of the async await syntax on
+// client/actions/index.js
+// By default, whenever we use the async await syntax, Babel assumes that
+// there is something called a regenerator runtime defined inside of our
+// working environment.
+// And so essentially Babel is complaining because we didn't set up everything
+// correctly.
+// So a resolution to that is importing Babel Polyfill. It's going to actually
+// execute that module, which is going to run through and polyfill or essentially
+// define some of these helper functions that Babel wants to use for doing things
+// like making use of the async await syntax.
+// So we need to do this import not only inside of our server side bundle, but
+// also inside the client side as well.
 
 // This tells express that it needs to treat that public directory as a static
 // or public directory that is available to the outside world.

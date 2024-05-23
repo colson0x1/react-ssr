@@ -15,7 +15,6 @@ export default (req, store) => {
       <StaticRouter location={req.path} context={{}}>
         <Routes />
       </StaticRouter>
-      ,
     </Provider>,
   );
 
