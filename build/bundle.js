@@ -60,7 +60,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 1);
+/******/ 	return __webpack_require__(__webpack_require__.s = 2);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -71,22 +71,28 @@ module.exports = require("react");
 
 /***/ }),
 /* 1 */
+/***/ (function(module, exports) {
+
+module.exports = require("react-router-dom");
+
+/***/ }),
+/* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var _express = __webpack_require__(2);
+var _express = __webpack_require__(3);
 
 var _express2 = _interopRequireDefault(_express);
 
-var _renderer = __webpack_require__(5);
+var _renderer = __webpack_require__(4);
 
 var _renderer2 = _interopRequireDefault(_renderer);
 
-var _helper = __webpack_require__(!(function webpackMissingModule() { var e = new Error("Cannot find module \"./helper\""); e.code = 'MODULE_NOT_FOUND'; throw e; }()));
+var _createStore = __webpack_require__(9);
 
-var _helper2 = _interopRequireDefault(_helper);
+var _createStore2 = _interopRequireDefault(_createStore);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -116,7 +122,7 @@ app.use(_express2.default.static('public'));
 // to our renderer which is going to pass the request on to React Router and
 // allow that to decide what to do with it
 app.get('*', function (req, res) {
-  var store = (0, _helper2.default)();
+  var store = (0, _createStore2.default)();
 
   // Some logic to initialize and load data into the store
 
@@ -329,19 +335,103 @@ app.listen(3000, () => {
 */
 
 /***/ }),
-/* 2 */
+/* 3 */
 /***/ (function(module, exports) {
 
 module.exports = require("express");
 
 /***/ }),
-/* 3 */
+/* 4 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _react = __webpack_require__(0);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _server = __webpack_require__(5);
+
+var _reactRedux = __webpack_require__(6);
+
+var _reactRouterDom = __webpack_require__(1);
+
+var _Routes = __webpack_require__(7);
+
+var _Routes2 = _interopRequireDefault(_Routes);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = function (req, store) {
+  var content = (0, _server.renderToString)(_react2.default.createElement(
+    _reactRedux.Provider,
+    { store: store },
+    _react2.default.createElement(
+      _reactRouterDom.StaticRouter,
+      { location: req.path, context: {} },
+      _react2.default.createElement(_Routes2.default, null)
+    ),
+    ','
+  ));
+
+  return '\n    <html>\n      <head></head>\n      <body>\n        <div id=\'root\'>' + content + '</div>\n        <script src=\'bundle.js\'></script>\n      </body>\n    </html>\n  ';
+};
+// No need to import Home component because Home Component is rendered by the
+// Routes Component
+// This file is going to house a function that will simply render our React
+// app and return it as a string
+
+/***/ }),
+/* 5 */
 /***/ (function(module, exports) {
 
 module.exports = require("react-dom/server");
 
 /***/ }),
-/* 4 */
+/* 6 */
+/***/ (function(module, exports) {
+
+module.exports = require("react-redux");
+
+/***/ }),
+/* 7 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _react = __webpack_require__(0);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _reactRouterDom = __webpack_require__(1);
+
+var _Home = __webpack_require__(8);
+
+var _Home2 = _interopRequireDefault(_Home);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = function () {
+  return _react2.default.createElement(
+    'div',
+    null,
+    _react2.default.createElement(_reactRouterDom.Route, { exact: true, path: '/', component: _Home2.default })
+  );
+}; // This is a file that's going to be shared between both the client and the
+// server side codebases.
+
+/***/ }),
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -416,7 +506,7 @@ var Home = function Home() {
 exports.default = Home;
 
 /***/ }),
-/* 5 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -426,84 +516,57 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _react = __webpack_require__(0);
+var _redux = __webpack_require__(10);
 
-var _react2 = _interopRequireDefault(_react);
+var _reduxThunk = __webpack_require__(11);
 
-var _server = __webpack_require__(3);
-
-var _reactRedux = __webpack_require__(8);
-
-var _reactRouterDom = __webpack_require__(6);
-
-var _Routes = __webpack_require__(7);
-
-var _Routes2 = _interopRequireDefault(_Routes);
+var _reduxThunk2 = _interopRequireDefault(_reduxThunk);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-exports.default = function (req, store) {
-  var content = (0, _server.renderToString)(_react2.default.createElement(
-    _reactRedux.Provider,
-    { store: store },
-    _react2.default.createElement(
-      _reactRouterDom.StaticRouter,
-      { location: req.path, context: {} },
-      _react2.default.createElement(_Routes2.default, null)
-    ),
-    ','
-  ));
+// We're not importing Provider here like on client.js and that's because the
+// soul purpose of this file right now is to create the Redux store whereas
+// inside the client.js file, we want it to both create the Redux store and
+// then immediately use it inside the React application.
 
-  return '\n    <html>\n      <head></head>\n      <body>\n        <div id=\'root\'>' + content + '</div>\n        <script src=\'bundle.js\'></script>\n      </body>\n    </html>\n  ';
-};
-// No need to import Home component because Home Component is rendered by the
-// Routes Component
-// This file is going to house a function that will simply render our React
-// app and return it as a string
+// The Redux store on this Server is going to behave slightly different than
+// it does on the client.
+// One of the big drivers behind this is the fact that we have this big challenge
+// here where we need to do some detection of when we finish all of our initial
+// data loading (i.e detect when all initial data load action creators are completed
+// on server) before we attempt to actually render our application.
+// And so a lot of the running theme around creating this Redux Store on the
+// Server is going to be all about creating the store and working with it in some
+// fashion before we ever attempt to render our application inside the renderer.
+// And so that's why we are not tying the store creation on the server very
+// closely to that Provider tag, because as soon as we make that Provider tag,
+// it really indicates that we are trying to or attempting to render our
+// application.
+// So in other words, we're just creating the store inside of here and that's it!
 
-/***/ }),
-/* 6 */
-/***/ (function(module, exports) {
-
-module.exports = require("react-router-dom");
-
-/***/ }),
-/* 7 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _react = __webpack_require__(0);
-
-var _react2 = _interopRequireDefault(_react);
-
-var _reactRouterDom = __webpack_require__(6);
-
-var _Home = __webpack_require__(4);
-
-var _Home2 = _interopRequireDefault(_Home);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+/* @ Redux on SSR
+ * Redux needs to be different configuration on Browser vs Server:
+ * We're going to create two different stores. And we're going to have one
+ * store for the browser bundle and one store for the server bundle.
+ */
 
 exports.default = function () {
-  return _react2.default.createElement(
-    'div',
-    null,
-    _react2.default.createElement(_reactRouterDom.Route, { exact: true, path: '/', component: _Home2.default })
-  );
-}; // This is a file that's going to be shared between both the client and the
-// server side codebases.
+  var store = (0, _redux.createStore)(reducers, {}, (0, _redux.applyMiddleware)(_reduxThunk2.default));
+
+  return store;
+};
 
 /***/ }),
-/* 8 */
+/* 10 */
 /***/ (function(module, exports) {
 
-module.exports = require("react-redux");
+module.exports = require("redux");
+
+/***/ }),
+/* 11 */
+/***/ (function(module, exports) {
+
+module.exports = require("redux-thunk");
 
 /***/ })
 /******/ ]);

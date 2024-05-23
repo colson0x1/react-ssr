@@ -1,6 +1,6 @@
 import express from 'express';
 import renderer from './helpers/renderer';
-import createStore from './helper';
+import createStore from './helpers/createStore';
 
 // @ React Router DOM
 // Server - StaticRouter
