@@ -84,6 +84,10 @@ var _renderer = __webpack_require__(5);
 
 var _renderer2 = _interopRequireDefault(_renderer);
 
+var _helper = __webpack_require__(!(function webpackMissingModule() { var e = new Error("Cannot find module \"./helper\""); e.code = 'MODULE_NOT_FOUND'; throw e; }()));
+
+var _helper2 = _interopRequireDefault(_helper);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 // @ React Router DOM
@@ -112,7 +116,11 @@ app.use(_express2.default.static('public'));
 // to our renderer which is going to pass the request on to React Router and
 // allow that to decide what to do with it
 app.get('*', function (req, res) {
-  res.send((0, _renderer2.default)(req));
+  var store = (0, _helper2.default)();
+
+  // Some logic to initialize and load data into the store
+
+  res.send((0, _renderer2.default)(req, store));
 });
 
 app.listen(3000, function () {
@@ -424,6 +432,8 @@ var _react2 = _interopRequireDefault(_react);
 
 var _server = __webpack_require__(3);
 
+var _reactRedux = __webpack_require__(8);
+
 var _reactRouterDom = __webpack_require__(6);
 
 var _Routes = __webpack_require__(7);
@@ -432,20 +442,24 @@ var _Routes2 = _interopRequireDefault(_Routes);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-// No need to import Home component because Home Component is rendered by the
-// Routes Component
-// This file is going to house a function that will simply render our React
-// app and return it as a string
-
-exports.default = function (req) {
+exports.default = function (req, store) {
   var content = (0, _server.renderToString)(_react2.default.createElement(
-    _reactRouterDom.StaticRouter,
-    { location: req.path, context: {} },
-    _react2.default.createElement(_Routes2.default, null)
+    _reactRedux.Provider,
+    { store: store },
+    _react2.default.createElement(
+      _reactRouterDom.StaticRouter,
+      { location: req.path, context: {} },
+      _react2.default.createElement(_Routes2.default, null)
+    ),
+    ','
   ));
 
   return '\n    <html>\n      <head></head>\n      <body>\n        <div id=\'root\'>' + content + '</div>\n        <script src=\'bundle.js\'></script>\n      </body>\n    </html>\n  ';
 };
+// No need to import Home component because Home Component is rendered by the
+// Routes Component
+// This file is going to house a function that will simply render our React
+// app and return it as a string
 
 /***/ }),
 /* 6 */
@@ -484,6 +498,12 @@ exports.default = function () {
   );
 }; // This is a file that's going to be shared between both the client and the
 // server side codebases.
+
+/***/ }),
+/* 8 */
+/***/ (function(module, exports) {
+
+module.exports = require("react-redux");
 
 /***/ })
 /******/ ]);

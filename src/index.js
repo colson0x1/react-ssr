@@ -1,5 +1,6 @@
 import express from 'express';
 import renderer from './helpers/renderer';
+import createStore from './helper';
 
 // @ React Router DOM
 // Server - StaticRouter
@@ -27,7 +28,11 @@ app.use(express.static('public'));
 // to our renderer which is going to pass the request on to React Router and
 // allow that to decide what to do with it
 app.get('*', (req, res) => {
-  res.send(renderer(req));
+  const store = createStore();
+
+  // Some logic to initialize and load data into the store
+
+  res.send(renderer(req, store));
 });
 
 app.listen(3000, () => {
