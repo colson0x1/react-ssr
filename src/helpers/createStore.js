@@ -6,6 +6,7 @@
 
 import { createStore, applyMiddleware } from 'redux';
 import thunk from 'redux-thunk';
+import reducers from '../client/reducers';
 
 // We're not importing Provider here like on client.js and that's because the
 // soul purpose of this file right now is to create the Redux store whereas
