@@ -28069,103 +28069,29 @@ var _react = __webpack_require__(1);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _Home = __webpack_require__(116);
+var _HomePage = __webpack_require__(485);
 
-var _Home2 = _interopRequireDefault(_Home);
+var _HomePage2 = _interopRequireDefault(_HomePage);
 
-var _UsersList = __webpack_require__(146);
+var _UsersListPage = __webpack_require__(486);
 
-var _UsersList2 = _interopRequireDefault(_UsersList);
+var _UsersListPage2 = _interopRequireDefault(_UsersListPage);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = [{
   path: '/',
-  component: _Home2.default,
+  component: _HomePage2.default,
   exact: true
 }, {
-  loadData: _UsersList.loadData,
+  loadData: _UsersListPage.loadData,
   path: '/users',
-  component: _UsersList2.default
+  component: _UsersListPage2.default
 }]; // This is a file that's going to be shared between both the client and the
 // server side codebases.
 
 /***/ }),
-/* 116 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _react = __webpack_require__(1);
-
-var _react2 = _interopRequireDefault(_react);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var Home = function Home() {
-  return _react2.default.createElement(
-    'div',
-    { style: { color: 'dodgerblue' } },
-    'Home Component!!!',
-    _react2.default.createElement(
-      'button',
-      { onClick: function onClick() {
-          return console.log('Hi there!');
-        } },
-      'Press me!'
-    )
-  );
-}; // ES2015 Modules syntax or the `import .. export` syntax
-
-/* @ Normal React Application
- * In a normal traditional React application, we would have a JavaScript file
- * that gets loaded into the browser and that then gets executed. The JS file
- * would render our JavaScript application, stick it into the DOM and then
- * attach any related event handlers that we set up inside of the code base.
- * So with the normal application, we ship down our entire JavaScript bundle
- * file to the browser and that renders the app and sets up event handlers
- * inside the browser.
- *
- * With this current setup, there's no JavaScript code being set down to the
- * users browser right now.
- * We make a request to the root route, the express server sends back the HTML
- * from that Home component and absolutely nothing else. There's no JS code
- * that is being loaded into the browser that sets up that event handler for us.
- * We could check that on the network log in response.
- * So in order to actually make sure that we get some JavaScript or have our
- * application work correctly, we need to make sure that we somehow ship down
- * all the JavaScript code related to our application after we ship down all
- * this HTML that gets some initial content on the screen.
- *
- * So right now in the Server Side world, we are taking care of step number one.
- * Step number one is getting HTML or getting content to show up on the screen.
- * Step number two is, however, is to make sure that we then load up our
- * React application and have the React application set up all the event handlers
- * and action creators and data loading requests and all that kind of stuff that
- * we normally want to have occur inside of our application.
- *
- * Solution to that Pain Point:
- * Create two JavaScript bundles using Webpack. One bundle is going to contain
- * all of our server side and client side code i.e our current setup
- * webpack.server.js AND now we create another bundle for React app which will
- * be shipped down to the users browser.
- * The reason we want to have two bundles is our Server Side bundle and the
- * Server Side code inside of it might contain sensitive information or sensitive
- * code. For example, it might contain some secret API keys or special logic
- * that could somehow be exploited. So there's going to be some amount of code on
- * our server that we never want to ship down to the browser.
- * So to implement this, we are going to set up a second Webpack pipeline that's
- * going to run right along side our current one.
- */
-
-exports.default = Home;
-
-/***/ }),
+/* 116 */,
 /* 117 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -29824,100 +29750,7 @@ module.exports = function spread(callback) {
 
 
 /***/ }),
-/* 146 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.loadData = undefined;
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _react = __webpack_require__(1);
-
-var _react2 = _interopRequireDefault(_react);
-
-var _reactRedux = __webpack_require__(105);
-
-var _actions = __webpack_require__(126);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var UsersList = function (_Component) {
-  _inherits(UsersList, _Component);
-
-  function UsersList() {
-    _classCallCheck(this, UsersList);
-
-    return _possibleConstructorReturn(this, (UsersList.__proto__ || Object.getPrototypeOf(UsersList)).apply(this, arguments));
-  }
-
-  _createClass(UsersList, [{
-    key: 'componentDidMount',
-    value: function componentDidMount() {
-      this.props.fetchUsers();
-    }
-  }, {
-    key: 'renderUsers',
-    value: function renderUsers() {
-      return this.props.users.map(function (user) {
-        return _react2.default.createElement(
-          'li',
-          { key: user.id },
-          user.name
-        );
-      });
-    }
-  }, {
-    key: 'render',
-    value: function render() {
-      return _react2.default.createElement(
-        'div',
-        null,
-        'Big list of users:',
-        _react2.default.createElement(
-          'ul',
-          null,
-          this.renderUsers()
-        )
-      );
-    }
-  }]);
-
-  return UsersList;
-}(_react.Component);
-
-function mapStateToProps(state) {
-  return { users: state.users };
-}
-
-function loadData(store) {
-  // console.log('Trying to load some data...');
-  // We're going to do a manual dispatch here and we're going to call the
-  // fetchUsers action creator and pass the result into store.dispatch
-  // So now fetchUsers will be called. It will make a network request to the
-  // API and it's going to return a promise representing the network request
-  // to make sure that the promise is created, gets send back to our index.js
-  // file.
-  // So the thing that actually calls loadData, we're going to return the result
-  // of all of this stuff right here.
-  return store.dispatch((0, _actions.fetchUsers)());
-}
-
-exports.loadData = loadData;
-exports.default = (0, _reactRedux.connect)(mapStateToProps, { fetchUsers: _actions.fetchUsers })(UsersList);
-
-/***/ }),
+/* 146 */,
 /* 147 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -39880,6 +39713,175 @@ Route.childContextTypes = {
   router: _propTypes2.default.object.isRequired
 };
 exports.default = Route;
+
+/***/ }),
+/* 485 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _react = __webpack_require__(1);
+
+var _react2 = _interopRequireDefault(_react);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var Home = function Home() {
+  return _react2.default.createElement(
+    'div',
+    { style: { color: 'dodgerblue' } },
+    'Home Component!!!',
+    _react2.default.createElement(
+      'button',
+      { onClick: function onClick() {
+          return console.log('Hi there!');
+        } },
+      'Press me!'
+    )
+  );
+}; // ES2015 Modules syntax or the `import .. export` syntax
+
+/* @ Normal React Application
+ * In a normal traditional React application, we would have a JavaScript file
+ * that gets loaded into the browser and that then gets executed. The JS file
+ * would render our JavaScript application, stick it into the DOM and then
+ * attach any related event handlers that we set up inside of the code base.
+ * So with the normal application, we ship down our entire JavaScript bundle
+ * file to the browser and that renders the app and sets up event handlers
+ * inside the browser.
+ *
+ * With this current setup, there's no JavaScript code being set down to the
+ * users browser right now.
+ * We make a request to the root route, the express server sends back the HTML
+ * from that Home component and absolutely nothing else. There's no JS code
+ * that is being loaded into the browser that sets up that event handler for us.
+ * We could check that on the network log in response.
+ * So in order to actually make sure that we get some JavaScript or have our
+ * application work correctly, we need to make sure that we somehow ship down
+ * all the JavaScript code related to our application after we ship down all
+ * this HTML that gets some initial content on the screen.
+ *
+ * So right now in the Server Side world, we are taking care of step number one.
+ * Step number one is getting HTML or getting content to show up on the screen.
+ * Step number two is, however, is to make sure that we then load up our
+ * React application and have the React application set up all the event handlers
+ * and action creators and data loading requests and all that kind of stuff that
+ * we normally want to have occur inside of our application.
+ *
+ * Solution to that Pain Point:
+ * Create two JavaScript bundles using Webpack. One bundle is going to contain
+ * all of our server side and client side code i.e our current setup
+ * webpack.server.js AND now we create another bundle for React app which will
+ * be shipped down to the users browser.
+ * The reason we want to have two bundles is our Server Side bundle and the
+ * Server Side code inside of it might contain sensitive information or sensitive
+ * code. For example, it might contain some secret API keys or special logic
+ * that could somehow be exploited. So there's going to be some amount of code on
+ * our server that we never want to ship down to the browser.
+ * So to implement this, we are going to set up a second Webpack pipeline that's
+ * going to run right along side our current one.
+ */
+
+exports.default = Home;
+
+/***/ }),
+/* 486 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.loadData = undefined;
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = __webpack_require__(1);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _reactRedux = __webpack_require__(105);
+
+var _actions = __webpack_require__(126);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var UsersList = function (_Component) {
+  _inherits(UsersList, _Component);
+
+  function UsersList() {
+    _classCallCheck(this, UsersList);
+
+    return _possibleConstructorReturn(this, (UsersList.__proto__ || Object.getPrototypeOf(UsersList)).apply(this, arguments));
+  }
+
+  _createClass(UsersList, [{
+    key: 'componentDidMount',
+    value: function componentDidMount() {
+      this.props.fetchUsers();
+    }
+  }, {
+    key: 'renderUsers',
+    value: function renderUsers() {
+      return this.props.users.map(function (user) {
+        return _react2.default.createElement(
+          'li',
+          { key: user.id },
+          user.name
+        );
+      });
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      return _react2.default.createElement(
+        'div',
+        null,
+        'Big list of users:',
+        _react2.default.createElement(
+          'ul',
+          null,
+          this.renderUsers()
+        )
+      );
+    }
+  }]);
+
+  return UsersList;
+}(_react.Component);
+
+function mapStateToProps(state) {
+  return { users: state.users };
+}
+
+function loadData(store) {
+  // console.log('Trying to load some data...');
+  // We're going to do a manual dispatch here and we're going to call the
+  // fetchUsers action creator and pass the result into store.dispatch
+  // So now fetchUsers will be called. It will make a network request to the
+  // API and it's going to return a promise representing the network request
+  // to make sure that the promise is created, gets send back to our index.js
+  // file.
+  // So the thing that actually calls loadData, we're going to return the result
+  // of all of this stuff right here.
+  return store.dispatch((0, _actions.fetchUsers)());
+}
+
+exports.loadData = loadData;
+exports.default = (0, _reactRedux.connect)(mapStateToProps, { fetchUsers: _actions.fetchUsers })(UsersList);
 
 /***/ })
 /******/ ]);

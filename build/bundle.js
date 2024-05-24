@@ -494,103 +494,29 @@ var _react = __webpack_require__(0);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _Home = __webpack_require__(8);
+var _HomePage = __webpack_require__(19);
 
-var _Home2 = _interopRequireDefault(_Home);
+var _HomePage2 = _interopRequireDefault(_HomePage);
 
-var _UsersList = __webpack_require__(16);
+var _UsersListPage = __webpack_require__(20);
 
-var _UsersList2 = _interopRequireDefault(_UsersList);
+var _UsersListPage2 = _interopRequireDefault(_UsersListPage);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = [{
   path: '/',
-  component: _Home2.default,
+  component: _HomePage2.default,
   exact: true
 }, {
-  loadData: _UsersList.loadData,
+  loadData: _UsersListPage.loadData,
   path: '/users',
-  component: _UsersList2.default
+  component: _UsersListPage2.default
 }]; // This is a file that's going to be shared between both the client and the
 // server side codebases.
 
 /***/ }),
-/* 8 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _react = __webpack_require__(0);
-
-var _react2 = _interopRequireDefault(_react);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var Home = function Home() {
-  return _react2.default.createElement(
-    'div',
-    { style: { color: 'dodgerblue' } },
-    'Home Component!!!',
-    _react2.default.createElement(
-      'button',
-      { onClick: function onClick() {
-          return console.log('Hi there!');
-        } },
-      'Press me!'
-    )
-  );
-}; // ES2015 Modules syntax or the `import .. export` syntax
-
-/* @ Normal React Application
- * In a normal traditional React application, we would have a JavaScript file
- * that gets loaded into the browser and that then gets executed. The JS file
- * would render our JavaScript application, stick it into the DOM and then
- * attach any related event handlers that we set up inside of the code base.
- * So with the normal application, we ship down our entire JavaScript bundle
- * file to the browser and that renders the app and sets up event handlers
- * inside the browser.
- *
- * With this current setup, there's no JavaScript code being set down to the
- * users browser right now.
- * We make a request to the root route, the express server sends back the HTML
- * from that Home component and absolutely nothing else. There's no JS code
- * that is being loaded into the browser that sets up that event handler for us.
- * We could check that on the network log in response.
- * So in order to actually make sure that we get some JavaScript or have our
- * application work correctly, we need to make sure that we somehow ship down
- * all the JavaScript code related to our application after we ship down all
- * this HTML that gets some initial content on the screen.
- *
- * So right now in the Server Side world, we are taking care of step number one.
- * Step number one is getting HTML or getting content to show up on the screen.
- * Step number two is, however, is to make sure that we then load up our
- * React application and have the React application set up all the event handlers
- * and action creators and data loading requests and all that kind of stuff that
- * we normally want to have occur inside of our application.
- *
- * Solution to that Pain Point:
- * Create two JavaScript bundles using Webpack. One bundle is going to contain
- * all of our server side and client side code i.e our current setup
- * webpack.server.js AND now we create another bundle for React app which will
- * be shipped down to the users browser.
- * The reason we want to have two bundles is our Server Side bundle and the
- * Server Side code inside of it might contain sensitive information or sensitive
- * code. For example, it might contain some secret API keys or special logic
- * that could somehow be exploited. So there's going to be some amount of code on
- * our server that we never want to ship down to the browser.
- * So to implement this, we are going to set up a second Webpack pipeline that's
- * going to run right along side our current one.
- */
-
-exports.default = Home;
-
-/***/ }),
+/* 8 */,
 /* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -767,7 +693,95 @@ var fetchUsers = exports.fetchUsers = function fetchUsers() {
 module.exports = require("axios");
 
 /***/ }),
-/* 16 */
+/* 16 */,
+/* 17 */
+/***/ (function(module, exports) {
+
+module.exports = require("babel-polyfill");
+
+/***/ }),
+/* 18 */
+/***/ (function(module, exports) {
+
+module.exports = require("react-router-config");
+
+/***/ }),
+/* 19 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _react = __webpack_require__(0);
+
+var _react2 = _interopRequireDefault(_react);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var Home = function Home() {
+  return _react2.default.createElement(
+    'div',
+    { style: { color: 'dodgerblue' } },
+    'Home Component!!!',
+    _react2.default.createElement(
+      'button',
+      { onClick: function onClick() {
+          return console.log('Hi there!');
+        } },
+      'Press me!'
+    )
+  );
+}; // ES2015 Modules syntax or the `import .. export` syntax
+
+/* @ Normal React Application
+ * In a normal traditional React application, we would have a JavaScript file
+ * that gets loaded into the browser and that then gets executed. The JS file
+ * would render our JavaScript application, stick it into the DOM and then
+ * attach any related event handlers that we set up inside of the code base.
+ * So with the normal application, we ship down our entire JavaScript bundle
+ * file to the browser and that renders the app and sets up event handlers
+ * inside the browser.
+ *
+ * With this current setup, there's no JavaScript code being set down to the
+ * users browser right now.
+ * We make a request to the root route, the express server sends back the HTML
+ * from that Home component and absolutely nothing else. There's no JS code
+ * that is being loaded into the browser that sets up that event handler for us.
+ * We could check that on the network log in response.
+ * So in order to actually make sure that we get some JavaScript or have our
+ * application work correctly, we need to make sure that we somehow ship down
+ * all the JavaScript code related to our application after we ship down all
+ * this HTML that gets some initial content on the screen.
+ *
+ * So right now in the Server Side world, we are taking care of step number one.
+ * Step number one is getting HTML or getting content to show up on the screen.
+ * Step number two is, however, is to make sure that we then load up our
+ * React application and have the React application set up all the event handlers
+ * and action creators and data loading requests and all that kind of stuff that
+ * we normally want to have occur inside of our application.
+ *
+ * Solution to that Pain Point:
+ * Create two JavaScript bundles using Webpack. One bundle is going to contain
+ * all of our server side and client side code i.e our current setup
+ * webpack.server.js AND now we create another bundle for React app which will
+ * be shipped down to the users browser.
+ * The reason we want to have two bundles is our Server Side bundle and the
+ * Server Side code inside of it might contain sensitive information or sensitive
+ * code. For example, it might contain some secret API keys or special logic
+ * that could somehow be exploited. So there's going to be some amount of code on
+ * our server that we never want to ship down to the browser.
+ * So to implement this, we are going to set up a second Webpack pipeline that's
+ * going to run right along side our current one.
+ */
+
+exports.default = Home;
+
+/***/ }),
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -859,18 +873,6 @@ function loadData(store) {
 
 exports.loadData = loadData;
 exports.default = (0, _reactRedux.connect)(mapStateToProps, { fetchUsers: _actions.fetchUsers })(UsersList);
-
-/***/ }),
-/* 17 */
-/***/ (function(module, exports) {
-
-module.exports = require("babel-polyfill");
-
-/***/ }),
-/* 18 */
-/***/ (function(module, exports) {
-
-module.exports = require("react-router-config");
 
 /***/ })
 /******/ ]);
