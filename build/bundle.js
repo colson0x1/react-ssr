@@ -418,6 +418,10 @@ var _reactRedux = __webpack_require__(6);
 
 var _reactRouterConfig = __webpack_require__(18);
 
+var _serializeJavascript = __webpack_require__(21);
+
+var _serializeJavascript2 = _interopRequireDefault(_serializeJavascript);
+
 var _Routes = __webpack_require__(7);
 
 var _Routes2 = _interopRequireDefault(_Routes);
@@ -472,10 +476,46 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 // state object, or in other words, the second argument to the createStore()
 // function!
 
-// No need to import Home component because Home Component is rendered by the
-// Routes Component
-// This file is going to house a function that will simply render our React
-// app and return it as a string
+/* @ Mitigate XSS Attacks */
+// But doing this: window.INITIAL_STATE = ${JSON.stringify(store.getState())}
+// directly into our template is actually vulnerable to a little security flaw.
+/* https://react-ssr-api.herokuapp.com/users/xss */
+// By default, React protects against XSS attacks, but only on content that it,
+// specifically React renders!
+// So whenever we take our state out of our Redux store and try to dump it
+// directly into our HTML template, we need to be very aware of attacks like
+// this because they are just trivially easy for hackers to execute.
+//
+//
+// Resolution to XSS:
+// Here, we're currently dumping all of our state out into the HTML template.
+// i.e. window.INITIAL_STATE = ${JSON.stringify(store.getState())}
+// Now what we really have to do is kind of scrub the state right here.
+// We've to go through all the data that is begin, that is contained within
+// our Redux store and take care of any malicious code that is inside of there.
+// So there's really not a lot that we can do against, say, trying to keep our
+// API from getting bad data inside of it.
+// We should always just assume that somehow bad data might end up inside of
+// our application. So rather than trying to war against the API side, we're
+// going to make sure that whatever data we dump into our template i.e store.getState(),
+// is not going to accidentally be executed.
+// SO to take care of this, we're going to import a library called
+// JavaScript Serialize.
+// Serialize right here is a function that takes a string and will essentially
+// escape any charactes in there that are involved with setting up script tags,
+// for example, the actual less than sign and greter than sign of the script tag
+// like that.
+// We replace JSON.stringify() with serialize()
+// i.e ${serialize(store.getState())}
+// THat will process it and we no longer have something like alert like that.
+// <script> tag will no longer be executed by the browser.
+// So essentially what this Serialize tool does is it takes any special characters
+// like those < or > signs and it replaces them with their Unicode equivalents.
+// So we convert all those bad tokens into the Unicode equivalents so that the
+// browser inside the script tag will not attempt to execute those code.
+// But when the browser attempts to actually render that token right there out
+// on the page, it will convert it back to ASCII or something like visually
+// equivalent for whatever the unicode character is!
 
 exports.default = function (req, store) {
   var content = (0, _server.renderToString)(_react2.default.createElement(
@@ -492,8 +532,12 @@ exports.default = function (req, store) {
     )
   ));
 
-  return '\n    <html>\n      <head></head>\n      <body>\n        <div id=\'root\'>' + content + '</div>\n        <script>\n          window.INITIAL_STATE = ' + JSON.stringify(store.getState()) + '\n        </script>\n        <script src=\'bundle.js\'></script>\n      </body>\n    </html>\n  ';
+  return '\n    <html>\n      <head></head>\n      <body>\n        <div id=\'root\'>' + content + '</div>\n        <script>\n          window.INITIAL_STATE = ' + (0, _serializeJavascript2.default)(store.getState()) + '\n        </script>\n        <script src=\'bundle.js\'></script>\n      </body>\n    </html>\n  ';
 };
+// No need to import Home component because Home Component is rendered by the
+// Routes Component
+// This file is going to house a function that will simply render our React
+// app and return it as a string
 
 /***/ }),
 /* 5 */
@@ -984,6 +1028,12 @@ exports.default = {
   // will be assigned to a component key.
   component: (0, _reactRedux.connect)(mapStateToProps, { fetchUsers: _actions.fetchUsers })(UsersList)
 };
+
+/***/ }),
+/* 21 */
+/***/ (function(module, exports) {
+
+module.exports = require("serialize-javascript");
 
 /***/ })
 /******/ ]);
