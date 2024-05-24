@@ -374,15 +374,42 @@ var _react2 = _interopRequireDefault(_react);
 
 var _server = __webpack_require__(5);
 
+var _reactRouterDom = __webpack_require__(1);
+
 var _reactRedux = __webpack_require__(6);
 
-var _reactRouterDom = __webpack_require__(1);
+var _reactRouterConfig = __webpack_require__(18);
 
 var _Routes = __webpack_require__(7);
 
 var _Routes2 = _interopRequireDefault(_Routes);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/* Figure out what sets of components to show/render based on URL without
+ * rendering the application!
+ * Resolution is to use the `react-router-config` lib for SSR!
+ * But once we start using `react router config` library, routes must be
+ * configured to be an array of objects where each object represents one route
+ * instead of classic JSX configuration!
+ * And we need to make sure that wherever we were using that routes component
+ * in the past, we replace all those places with this new renderRoutes fn
+ * from the `react router config` library.
+ */
+
+// Routes here is an array of JavaScript objects. We're gonna pass that into
+// the renderRoutes function. We can kind of imagine that renderRoutes right
+// here takes an array of route objects, turns them into normal route components
+// and then returns those.
+// So at the end of the day, right now when we actually render our application,
+// we still end up with some route components that we're very much used to
+// working with in general, but they're being produced for us automatically
+// by this renderRoutes function!
+
+// No need to import Home component because Home Component is rendered by the
+// Routes Component
+// This file is going to house a function that will simply render our React
+// app and return it as a string
 
 exports.default = function (req, store) {
   var content = (0, _server.renderToString)(_react2.default.createElement(
@@ -391,16 +418,16 @@ exports.default = function (req, store) {
     _react2.default.createElement(
       _reactRouterDom.StaticRouter,
       { location: req.path, context: {} },
-      _react2.default.createElement(_Routes2.default, null)
+      _react2.default.createElement(
+        'div',
+        null,
+        (0, _reactRouterConfig.renderRoutes)(_Routes2.default)
+      )
     )
   ));
 
   return '\n    <html>\n      <head></head>\n      <body>\n        <div id=\'root\'>' + content + '</div>\n        <script src=\'bundle.js\'></script>\n      </body>\n    </html>\n  ';
 };
-// No need to import Home component because Home Component is rendered by the
-// Routes Component
-// This file is going to house a function that will simply render our React
-// app and return it as a string
 
 /***/ }),
 /* 5 */
@@ -784,6 +811,12 @@ exports.default = (0, _reactRedux.connect)(mapStateToProps, { fetchUsers: _actio
 /***/ (function(module, exports) {
 
 module.exports = require("babel-polyfill");
+
+/***/ }),
+/* 18 */
+/***/ (function(module, exports) {
+
+module.exports = require("react-router-config");
 
 /***/ })
 /******/ ]);
