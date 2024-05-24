@@ -588,6 +588,80 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 // all the requests that are being made from our application are going to be
 // passing through our server, through the proxy onto the API Server.
 
+// @ Using JSON Web Tokens wouldn't work out too well here!
+// This entire authenticaion scheme hinges upon a cookie, and the fact that
+// cookies are issued on a per domain basis makes it seem like maybe using
+// a cookie isn't really the best solution.
+// So why don't we use a JSON Web Token (JWT) instead which doesn't follow
+// these same restrictions? We could manually attach a JSON web token to
+// every request like inside the header or the body or the URL, and that would
+// authenticate us with the API with no issue.
+// So why we aren't using JSON Web Token here?
+// So there's an abundantly straightforward and very clear reason that we are
+// using cookies rather than attempting to attach a JSON web token to all these
+// requests in the URL or the header or the body.
+//
+// So first, here is how an approach with JSON Web Tokens without cookies would
+// work!
+// Cookies and JSON Web Tokens are not like specifically exclusive. We can use
+// them together, we can take a JSON web token and put it into a cookie.
+// Using a JSON web token that is appended to the header, the URL or the body
+// of some data fetching request.
+// Let's imagine for a second that we are in our browser already on some page
+// and our Redux app decides that it needs to retrieve some data from like, say,
+// the user's endpoint right here i.e /users.
+// So to do this with JSON Web tokens, our Redux app would initiate a request
+// to this endpoint and attach the JSON web token to the URL, the body of the
+// request or header, one of those three. The JSON web token wold be communicated
+// to the server and then some magic authentication process would happen.
+// So the key thing here is to just keep in mind that communicating the JSON
+// web token to the server is not automatic.
+// When we want to use JSON web tokens outside of a cookie, we have to manually
+// attach that to the header, body or URL of the request. So with all that in
+// mind, let's think very carefully about what would happen during the
+// Server Side Rendering process if we are using a JSON web token.
+// The whole goal of Server Side Rendering is, we want to make sure that whenever
+// a user enters a URL into their address bar, presses enter, they immediately
+// get back some rendered content on the screen. That is the expectation with
+// Server Side Rendering. But that is not possible if we are trying to access
+// some protected route with a JSON web token authenticatoin scheme where the
+// token needs to be attached to the URL, the header or whatever.
+// That's the expectations.
+// So here's the reality! Because the JSON web token has to be manually attached
+// to any request, in order to show a proteced page, we would need a scheme like
+// when a user enters our URL into the address bar and presses enter, the browser
+// makes a get request to that domain and absolutely no information is included
+// along with the request except for typical cookies, headers and what not.
+// So we would see that incoming request and the JSON web token would not be
+// present on the incoming request because it does not get automatically attached
+// to the header, the URL or the body of the request. And we don't even get request
+// bodies with get requests.
+// So in other words, once we got that initial request to our server, we would
+// have to turn around and say back to the browser, Hey, what's your JSON web
+// token? You're trying to access some authenticated route. We need a token here
+// on the server.
+// So the whole key here is that we would have to make this follow up request,
+// send back, hey, give us your JSON web token. The browser would respond with
+// it and then we could finally send back some content. And so the reality of
+// this whole situation is that we would no longer be able to send back rendered
+// HTML content as a response to that initial request.
+// If we were using a JSON web token, we would instead have to do some follow up
+// request to the browser or from the browser to the server that incudes the
+// JSON web token. And this is all because when a user enters the URL of our
+// page into the address bar and hit enter, we have absolutely zero control
+// over sending along some information with that request. The only thing we can
+// count on being sent to that domain is the cookies that are tied to that domain.
+// So the cookies always will be attached automatically to the request.
+// And so that's why we are using a cookie based authentication flow here!!!
+//
+// So this is really a huge ussue around Server Side Rendering and we will see
+// people in the community try to struggle with this or come up with some clever
+// solution on manually attaching JSON web tokens for inside of Server Side
+// Rendering applications. But at the end of the day, if we want to use
+// authentication in a Server Side Renderd app, it really has to be cookie based
+// so that the auth details can be included in the initial request made to our
+// server!
+
 exports.default = function (req, store) {
   var content = (0, _server.renderToString)(_react2.default.createElement(
     _reactRedux.Provider,
