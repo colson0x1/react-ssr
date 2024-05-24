@@ -90,6 +90,10 @@ var _express2 = _interopRequireDefault(_express);
 
 var _reactRouterConfig = __webpack_require__(18);
 
+var _expressHttpProxy = __webpack_require__(22);
+
+var _expressHttpProxy2 = _interopRequireDefault(_expressHttpProxy);
+
 var _Routes = __webpack_require__(7);
 
 var _Routes2 = _interopRequireDefault(_Routes);
@@ -111,6 +115,27 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 // -> For use when running in a browser
 
 var app = (0, _express2.default)();
+
+// Send request from any request that is coming in to the root /api
+// So in other words, if the browser ever makes a request to our render server
+// with a route that begins with slash API i.e /api, we will attempt to proxy
+// it off or send it off to the proxy server.
+// And then we'll pass second argument of exactly what we want to have happen to
+// this request.
+// So we'll pass in proxy. Proxy is a function. We're going to pass it a string
+// that tells it where to send this request to.
+// So now any route whatsoever or any request whatsoever that tries to access
+// a route of slash api will be automatically sent off to this domain here.
+// The second option to the proxy function is just for this specific API setup
+// to make our lives a little bit easier. Specifically it's around the OAuth
+// process with Google and making sure that we don't run into some security
+// errors with the Google OAuth flow. That's all.
+app.use('/api', (0, _expressHttpProxy2.default)('http://react-ssr-api.herokuapp.com', {
+  proxyReqOptDecorator: function proxyReqOptDecorator(opts) {
+    opts.header['x-forwarded-host'] = 'localhost:3000';
+    return opts;
+  }
+}));
 
 // @ Uncaught ReferenceError: regeneratorRuntime is not defined!
 // That error message is due to our use of the async await syntax on
@@ -662,6 +687,32 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 // so that the auth details can be included in the initial request made to our
 // server!
 
+// We're now ready to set up a proxy to handle some of our authentication issues
+// between our browser, the render server and the API.
+// @ Blueprints of what we're going to do here!
+// So the first thing, we're going to attempt is to set up the actual proxy itself.
+// It's just a couple of lines of code to somehow proxy requests that are being
+// made from the browser to the render server off to the API.
+// The second and the third parts, however, are going to be a little bit more
+// challenging.
+// STEPS 2 and 3:
+// The entire point of Server Side Rendering (SSR) or even calling this application
+// a Universal app or Isomorphic app is to make sure that we are writing the
+// exact same code that gets executed on the server and the browser!
+// So step number two in this process is going to be to make sure that any API
+// requests or in other words, any action creators that we call while rendering
+// our application on the server will be sent off directly to out API.
+// Step number three is going to be to make sure that those exact same action
+// creators that are now being called later on from the browser will be sent to
+//  the proxy and then to the API server.
+//  So the whole key here is to remember that we are talking about action
+//  creators to make these requests and we want to call the exact same action
+//  creator on both the render server during the initial page load attempt
+//  and the browser during any follow up requests for data. So it's going to
+//  be the exact same action creator that needs to behave somewhat differently.
+//  One is going to be directly sending requests to the API server, the other is
+//  going to be sending requests to the proxy and then on to the API server.
+
 exports.default = function (req, store) {
   var content = (0, _server.renderToString)(_react2.default.createElement(
     _reactRedux.Provider,
@@ -1179,6 +1230,12 @@ exports.default = {
 /***/ (function(module, exports) {
 
 module.exports = require("serialize-javascript");
+
+/***/ }),
+/* 22 */
+/***/ (function(module, exports) {
+
+module.exports = require("express-http-proxy");
 
 /***/ })
 /******/ ]);

@@ -1,6 +1,7 @@
 import 'babel-polyfill';
 import express from 'express';
 import { matchRoutes } from 'react-router-config';
+import proxy from 'express-http-proxy';
 import Routes from './client/Routes';
 import renderer from './helpers/renderer';
 import createStore from './helpers/createStore';
@@ -12,6 +13,30 @@ import createStore from './helpers/createStore';
 // -> For use when running in a browser
 
 const app = express();
+
+// Send request from any request that is coming in to the root /api
+// So in other words, if the browser ever makes a request to our render server
+// with a route that begins with slash API i.e /api, we will attempt to proxy
+// it off or send it off to the proxy server.
+// And then we'll pass second argument of exactly what we want to have happen to
+// this request.
+// So we'll pass in proxy. Proxy is a function. We're going to pass it a string
+// that tells it where to send this request to.
+// So now any route whatsoever or any request whatsoever that tries to access
+// a route of slash api will be automatically sent off to this domain here.
+// The second option to the proxy function is just for this specific API setup
+// to make our lives a little bit easier. Specifically it's around the OAuth
+// process with Google and making sure that we don't run into some security
+// errors with the Google OAuth flow. That's all.
+app.use(
+  '/api',
+  proxy('http://react-ssr-api.herokuapp.com', {
+    proxyReqOptDecorator(opts) {
+      opts.header['x-forwarded-host'] = 'localhost:3000';
+      return opts;
+    },
+  }),
+);
 
 // @ Uncaught ReferenceError: regeneratorRuntime is not defined!
 // That error message is due to our use of the async await syntax on
