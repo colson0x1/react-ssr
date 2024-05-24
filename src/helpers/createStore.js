@@ -28,6 +28,54 @@ import reducers from '../client/reducers';
 // application.
 // So in other words, we're just creating the store inside of here and that's it!
 
+/* @ Client State Rehydration
+ * The current state of client side React App is, clearing out the page
+ * temporarily because none of our server side state from the Redux store is
+ * being communicated down to the browser.
+ * That is why we see, user's list after 2 seconds on the browser!
+ *
+ * We want to make sure that when we send down our application from the server
+ * to the browser, when the React application rehydrates on the client side or
+ * on the browser side, it doesn't think oh hey there's some content that
+ * shouldn't be here, we want to somehow preserve the state that we've
+ * prefetched from the server and somehow communicate the state down to
+ * the browser.
+ *
+ * Solution:
+ * We're going to add two additional steps into our Server Side Rendering flow.
+ * As we render the HTML document on our server, we're going to simultaneously
+ * take all of our state in our Redux store. So all the state that we've shoved
+ * in there from all those load data functions and we're going to take that state
+ * and dump it as JSON data into our HTML template.
+ * So the HTML document will not only contain all of our pages HTML, but it will
+ * also contain the raw data that was used to render it from our Redux Store.
+ * Then we send the HTML document down to the browser. We send the client
+ * bundle.js file, React starts up, Redux starts up. And then here's the important
+ * part, the client side store, when we initialize it, we're going to take all
+ * that JSON data that we dumped into our HTML template and we're going to pass
+ * it into the client side, create store function as the second argument, So
+ * when our Redux app boots up on the client side, it'll have an initial state
+ * state as that is the exact same as what was used to render the page on the
+ * sever.
+ * And so in theory, once the React app renders that first time on the browser,
+ * it should be using the exact same data to render the application as was used
+ * on the server. And so when it renders on the browser, the React app will
+ * render, it will realize, okay, I'm going to render the UsersList Component,
+ * it's going to pull the list of users out of the store and that list of users
+ * will result in this list of <li>'s right there with data.
+ * And so we should no longer see this warning message down there on the browser:
+ * @ Warning: Did not expect server HTML to contain a <li> in <ul>.
+ * So we should be no longer seeing that warning message because that initial
+ * hydration step on the browser will be using the exact same data or the exact
+ * same list of users. And so the React app will think that, yep, there definitely
+ * should be a list of <li>'s inside this URL i.e localhost:3000/users
+ *
+ * So that's pretty much the solution!!
+ * We're going to take all of our state ouf of the Redux Store, dump it into
+ * the HTML template, and then use that to initialize our store on the client
+ * side!!!
+ * */
+
 export default () => {
   const store = createStore(reducers, {}, applyMiddleware(thunk));
 
