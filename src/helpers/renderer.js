@@ -100,6 +100,77 @@ import Routes from '../client/Routes';
 // on the page, it will convert it back to ASCII or something like visually
 // equivalent for whatever the unicode character is!
 
+/* @ Authentication */
+/* @ Current authentication situation! */
+// Authentication process is a contract between the API server and the browser
+// that is held via cookies, jwt. Cookies in our case!
+// All cookies in the browser corresponds to the server at the domain, subdomain
+// and port that issued them.
+// In another words, when we get a cookie set from our API at say `api.app.com`,
+// when we make a request over to `www.app.com`, the cookie that had been
+// assigned from `api.app.com` is not sent along to `www.app.com`.
+// So as soon as we start accessing different domains, subdomains or ports,
+// those cookies are not automatically included in the request.
+// So in other words, if we make a request off to the API server and we get
+// our identifying token, we get our cookie,
+// a follow up request made to render server over here is not going to include
+// the cookies. So this render server cannot somehow take the cookie from
+// that request and make an authenticated request ocer to the API.
+//
+// So, We can definitely get a cookie assigned to the users browser from the API
+// by going through the usual authentication flow. But we don't have a great way
+// of somehow sharing that cookie with the render server.
+// Now this is a big issues because at some point in time we're going to want the
+// render server to be able to make an authenticated request over to the API.
+//
+// @ Solution
+// @ Authentication via Proxy
+// So to solve this, we're going to use a little bit of trickery.
+// We're going to set up a proxy directly on our render server. We are going
+// to make sure that whenever a user attempts to authenticate with our app,
+// rather than sending the user's browser directly over to the API, we will
+// instead send the user to the proxy running on our render server.
+// The proxy will then forward that request for authentication onto the API.
+// After a cookie is issued by the API, the proxy will then communicate that
+// cookie back to the browser. So as far as the browser is concerned, the API
+// server does not exist. The browser is going to think that it's just communicating
+// with our render server. But unbeknownst to the browser, the browser has a
+// proxy that is invisibly sending the requests out to the API server. The result
+// is that the browser is going to think that this authentication cookie that it
+// gets back is being issued by the render server, not by the API. So any follow
+// up requests beging made to the render server will include that orignal
+// authentication cookie that had been issued by the API.
+// Then the render server will make all the needed requests to the API and
+// manually attach the cookie onto that request to prove that the user is
+// authenticated.
+//
+// Phase I: Initial page load phase!
+// The thing to keep in mind is that during the initial page load period, the
+// server is going to make attempt to some request to our API on behalf of the
+// browser. So during the initial page load phase, the server needs to have
+// access to some cookie that proves that the original user from the browser
+// is logged in, so the proxy will not be active during this phase. There is
+// nothing to proxy. The server is going to make requests on behalf of the browser,
+// so we're going to have to somehow manually attach the cookie that got sent
+// from the original page load request (i.e from browser) to this follow up
+// request or this or this request over to the API over API Server so we can
+// kind of imagine that this cookie (browser) gets attached right to this
+// request over to the API.
+//
+// Phase II: Follow up request phase
+// So after that initial page load, any follow up request are going to be issued
+// directly from the browser. So this would be like some follow up AJAX request
+// that is being ussued by our React application. So this is where the proxy is
+// going to start to come into play. During this phase, the server will no longer
+// touch or modify incoming requests. It will simply pass requests on to the API
+// through the use of this proxy.
+// Now these two different phases are going to result in some pretty interesting
+// code. So we have to write code to make sure that during the initial page load
+// request phase, we attempt to make request to the API directly because they are
+// coming from the server. But then after that we're going to make sure that
+// all the requests that are being made from our application are going to be
+// passing through our server, through the proxy onto the API Server.
+
 export default (req, store) => {
   const content = renderToString(
     <Provider store={store}>
