@@ -1,5 +1,7 @@
 import 'babel-polyfill';
 import express from 'express';
+import { matchRoutes } from 'react-router-config';
+import Routes from './client/Routes';
 import renderer from './helpers/renderer';
 import createStore from './helpers/createStore';
 
@@ -46,7 +48,19 @@ app.use(express.static('public'));
 app.get('*', (req, res) => {
   const store = createStore();
 
-  // Some logic to initialize and load data into the store
+  // Some logic to initialize and load data into the store:
+  // Take the current incoming request path, or in other words, the page that
+  // the user is trying to fetch and look at our route configuration object and
+  // decide what set of components need to be rendered.
+  // `matchRoutes` takes two arguments. The first is the list of routes or the
+  // route configuration array. And then the second argument is the path that
+  // the user is attempting to fetch or attempting to view which is available
+  // to us as `req.path`!
+  // Now matchRoutes is going to look at this list of routes right here. It's
+  // going to look at whatever route the user is trying to visit and then it's
+  // going to return an array of components that are about to be rendered.
+  // Here log is on the server terminal
+  console.log(matchRoutes(Routes, req.path));
 
   res.send(renderer(req, store));
 });
