@@ -4434,12 +4434,21 @@ var _reducers2 = _interopRequireDefault(_reducers);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+// Now we have initial state from the server side redux state. So now this
+// will create a store with some initial state and then pass it into the React
+// app. So as soon as the UsersListPage component renders, it will reach into
+// the store. It will see that there's already a list of users inside of there
+// and it will attempt to render those onto the screen!
+// That resolves that list item hydration error and also we no longer get a
+// flash  of kind of empty page on the screen because the first time that
+// React renders, it says, Oh hey, here's my list of users already in the
+// Redux state. Fantastic. I'm just going to use these to render myself.
 // This is going to end up as being the route or the entry point of our client
 // side code base.
 
 // @ Startup point for the client side application
 
-var store = (0, _redux.createStore)(_reducers2.default, {}, (0, _redux.applyMiddleware)(_reduxThunk2.default));
+var store = (0, _redux.createStore)(_reducers2.default, window.INITIAL_STATE, (0, _redux.applyMiddleware)(_reduxThunk2.default));
 
 // Really important distinction here is that, When this code right here is
 // executed on the browser side, there is already content inside of that div

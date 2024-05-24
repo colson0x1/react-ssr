@@ -30,6 +30,34 @@ import Routes from '../client/Routes';
 // working with in general, but they're being produced for us automatically
 // by this renderRoutes function!
 
+/* @ Dump state to Templates */
+// By the time the store gets shoved into this function right here, it has all
+// of this initial state inside of it. So we've already called all of those
+// load data functions. We've already processed all the actions resulting
+// from that, and we've taken all that state and put it into the store.
+// So we can think of this `store` right here i.e (req, store), as kind of
+// like an encyclopedia full of information.
+//
+// So what we're gonna do is, we're gonna add a second script tag to our HTML
+// document right here. This is going to be a script tag that is not going to
+// attempt to load up a JavaScript file from the server like `src='bundle.js'`.
+// Instead, it's going to put down some literal JavaScript code directly into
+// our template where we're going to write some raw JavaScript where we get
+// all the state out of our store and then turn that into JSON data so that it
+// can be safely printed our there or essentially injected into the string.
+// If we attempt to just call ${store.getState()} and then put that into the
+// string,, we would end up with this classic looking JavaScript error:
+// ie. [Object object]
+// So we have to turn this into JSON first before we put it into the string
+// with JSON.stringify()
+// i.e. window.INITIAL_STATE = ${JSON.stringify(store.getState())}
+// That's pretty much it!
+//
+// So now all we have to do on the Client Side is locate our Client Side,
+// createStore function and pass in this window.INITIAL_STATE as the initial
+// state object, or in other words, the second argument to the createStore()
+// function!
+
 export default (req, store) => {
   const content = renderToString(
     <Provider store={store}>
@@ -44,6 +72,9 @@ export default (req, store) => {
       <head></head>
       <body>
         <div id='root'>${content}</div>
+        <script>
+          window.INITIAL_STATE = ${JSON.stringify(store.getState())}
+        </script>
         <script src='bundle.js'></script>
       </body>
     </html>
