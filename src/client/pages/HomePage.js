@@ -1,5 +1,20 @@
 // ES2015 Modules syntax or the `import .. export` syntax
 
+import React from 'react';
+
+const Home = () => {
+  return (
+    <div style={{ color: 'dodgerblue' }}>
+      Home Component!!!
+      <button onClick={() => console.log('Hi there!')}>Press me!</button>
+    </div>
+  );
+};
+
+export default {
+  component: Home,
+};
+
 /* @ Normal React Application
  * In a normal traditional React application, we would have a JavaScript file
  * that gets loaded into the browser and that then gets executed. The JS file
@@ -41,6 +56,7 @@
  * going to run right along side our current one.
  */
 
+/*
 import React from 'react';
 
 const Home = () => {
@@ -53,3 +69,4 @@ const Home = () => {
 };
 
 export default Home;
+*/

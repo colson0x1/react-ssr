@@ -40,5 +40,11 @@ function loadData(store) {
   return store.dispatch(fetchUsers());
 }
 
-export { loadData };
-export default connect(mapStateToProps, { fetchUsers })(UsersList);
+// export { loadData };
+export default {
+  // We will assign the load data fn to a key of load data
+  loadData,
+  // And then, The component that is produced by the connect fn right here
+  // will be assigned to a component key.
+  component: connect(mapStateToProps, { fetchUsers })(UsersList),
+};

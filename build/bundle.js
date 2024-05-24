@@ -490,6 +490,20 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; // This is a file that's going to be shared between both the client and the
+// server side codebases.
+
+/* @ Prevent naming collison for loadData fn for multiple pages */
+// Approach:
+// Rather than exporting the component and the load data function separately,
+// we're going to export one single object from each page component file.
+// And in that object we will wrap up both the component and the load data fn!
+// We'll then use our ES2015 spread syntax to dump both the component and the
+// load data definition into our route structure.
+
+/* import UsersListPage, { loadData } from './pages/UsersListPage'; */
+
+
 var _react = __webpack_require__(0);
 
 var _react2 = _interopRequireDefault(_react);
@@ -504,16 +518,15 @@ var _UsersListPage2 = _interopRequireDefault(_UsersListPage);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-exports.default = [{
+exports.default = [_extends({}, _HomePage2.default, {
   path: '/',
-  component: _HomePage2.default,
+  // component: HomePage,
   exact: true
-}, {
-  loadData: _UsersListPage.loadData,
-  path: '/users',
-  component: _UsersListPage2.default
-}]; // This is a file that's going to be shared between both the client and the
-// server side codebases.
+}), _extends({}, _UsersListPage2.default, {
+  // loadData,
+  path: '/users'
+  // component: UsersListPage,
+})];
 
 /***/ }),
 /* 8 */,
@@ -737,6 +750,10 @@ var Home = function Home() {
   );
 }; // ES2015 Modules syntax or the `import .. export` syntax
 
+exports.default = {
+  component: Home
+};
+
 /* @ Normal React Application
  * In a normal traditional React application, we would have a JavaScript file
  * that gets loaded into the browser and that then gets executed. The JS file
@@ -778,7 +795,20 @@ var Home = function Home() {
  * going to run right along side our current one.
  */
 
-exports.default = Home;
+/*
+import React from 'react';
+
+const Home = () => {
+  return (
+    <div style={{ color: 'dodgerblue' }}>
+      Home Component!!!
+      <button onClick={() => console.log('Hi there!')}>Press me!</button>
+    </div>
+  );
+};
+
+export default Home;
+*/
 
 /***/ }),
 /* 20 */
@@ -790,7 +820,6 @@ exports.default = Home;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.loadData = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -871,8 +900,14 @@ function loadData(store) {
   return store.dispatch((0, _actions.fetchUsers)());
 }
 
-exports.loadData = loadData;
-exports.default = (0, _reactRedux.connect)(mapStateToProps, { fetchUsers: _actions.fetchUsers })(UsersList);
+// export { loadData };
+exports.default = {
+  // We will assign the load data fn to a key of load data
+  loadData: loadData,
+  // And then, The component that is produced by the connect fn right here
+  // will be assigned to a component key.
+  component: (0, _reactRedux.connect)(mapStateToProps, { fetchUsers: _actions.fetchUsers })(UsersList)
+};
 
 /***/ })
 /******/ ]);
