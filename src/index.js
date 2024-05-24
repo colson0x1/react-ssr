@@ -60,7 +60,10 @@ app.get('*', (req, res) => {
   // going to look at whatever route the user is trying to visit and then it's
   // going to return an array of components that are about to be rendered.
   // Here log is on the server terminal
-  console.log(matchRoutes(Routes, req.path));
+  /* console.log(matchRoutes(Routes, req.path)); */
+  matchRoutes(Routes, req.path).map(({ route }) => {
+    return route.loadData ? route.loadData() : null;
+  });
 
   res.send(renderer(req, store));
 });
