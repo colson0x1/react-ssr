@@ -27,8 +27,17 @@ function mapStateToProps(state) {
   return { users: state.users };
 }
 
-function loadData() {
-  console.log('Trying to load some data...');
+function loadData(store) {
+  // console.log('Trying to load some data...');
+  // We're going to do a manual dispatch here and we're going to call the
+  // fetchUsers action creator and pass the result into store.dispatch
+  // So now fetchUsers will be called. It will make a network request to the
+  // API and it's going to return a promise representing the network request
+  // to make sure that the promise is created, gets send back to our index.js
+  // file.
+  // So the thing that actually calls loadData, we're going to return the result
+  // of all of this stuff right here.
+  return store.dispatch(fetchUsers());
 }
 
 export { loadData };

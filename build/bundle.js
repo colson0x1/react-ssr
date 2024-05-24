@@ -160,13 +160,28 @@ app.get('*', function (req, res) {
   // going to return an array of components that are about to be rendered.
   // Here log is on the server terminal
   /* console.log(matchRoutes(Routes, req.path)); */
-  (0, _reactRouterConfig.matchRoutes)(_Routes2.default, req.path).map(function (_ref) {
+
+  // So this entire statement right here will return an array of promises
+  // representing all the pending network requests from all the action
+  // creators that we might end up calling.
+  var promises = (0, _reactRouterConfig.matchRoutes)(_Routes2.default, req.path).map(function (_ref) {
     var route = _ref.route;
 
-    return route.loadData ? route.loadData() : null;
+    // Now all of our loadData functions will have a reference to our server
+    // side redux store
+    return route.loadData ? route.loadData(store) : null;
   });
 
-  res.send((0, _renderer2.default)(req, store));
+  Promise.all(promises).then(function () {
+    // Right here is when it is actually a very good time to actually render
+    // our application.
+    // So now after all of our data loading functions have finished, we will
+    // render the application and hopefully get all of our content to show up
+    // on the screen as HTML.
+    res.send((0, _renderer2.default)(req, store));
+  });
+
+  console.log(promises);
 });
 
 app.listen(3000, function () {
@@ -829,8 +844,17 @@ function mapStateToProps(state) {
   return { users: state.users };
 }
 
-function loadData() {
-  console.log('Trying to load some data...');
+function loadData(store) {
+  // console.log('Trying to load some data...');
+  // We're going to do a manual dispatch here and we're going to call the
+  // fetchUsers action creator and pass the result into store.dispatch
+  // So now fetchUsers will be called. It will make a network request to the
+  // API and it's going to return a promise representing the network request
+  // to make sure that the promise is created, gets send back to our index.js
+  // file.
+  // So the thing that actually calls loadData, we're going to return the result
+  // of all of this stuff right here.
+  return store.dispatch((0, _actions.fetchUsers)());
 }
 
 exports.loadData = loadData;

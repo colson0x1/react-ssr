@@ -61,11 +61,26 @@ app.get('*', (req, res) => {
   // going to return an array of components that are about to be rendered.
   // Here log is on the server terminal
   /* console.log(matchRoutes(Routes, req.path)); */
-  matchRoutes(Routes, req.path).map(({ route }) => {
-    return route.loadData ? route.loadData() : null;
+
+  // So this entire statement right here will return an array of promises
+  // representing all the pending network requests from all the action
+  // creators that we might end up calling.
+  const promises = matchRoutes(Routes, req.path).map(({ route }) => {
+    // Now all of our loadData functions will have a reference to our server
+    // side redux store
+    return route.loadData ? route.loadData(store) : null;
   });
 
-  res.send(renderer(req, store));
+  Promise.all(promises).then(() => {
+    // Right here is when it is actually a very good time to actually render
+    // our application.
+    // So now after all of our data loading functions have finished, we will
+    // render the application and hopefully get all of our content to show up
+    // on the screen as HTML.
+    res.send(renderer(req, store));
+  });
+
+  console.log(promises);
 });
 
 app.listen(3000, () => {
