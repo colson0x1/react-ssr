@@ -58,6 +58,19 @@ import Routes from '../client/Routes';
 // We need to default the value of `staticContext` to be an empty object there
 // if it wasn't defined as a prop.
 
+/* @ Handling Redirects
+ * If we attempt to visit the UsersListPage while we are not signed with
+ * JavaScript disabled/turned off, it appears that nothing actually gets
+ * rendered on the screen.
+ * So the issue right now is that when we render the page on the server, while
+ * we are not authenticated, the requireAuth hoc is going to attempt to render
+ * this Redirect tag there. (i.e return <Redirect to='/' />)
+ * When we show the Redirect tag on the server, our StaticRouter is going to
+ * add a new property to our context object.
+ * So it's not up to us to inspect that context object and decide whether or
+ * not we need to somehow redirect the user.
+ * */
+
 export default (req, store, context) => {
   const content = renderToString(
     <Provider store={store}>

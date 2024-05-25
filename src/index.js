@@ -254,6 +254,20 @@ app.get('*', (req, res) => {
 
     const content = renderer(req, store, context);
 
+    console.log('context', context);
+    // We'll look at the context.url property. If a URL property is defined on
+    // the context object, then we need to not send back all this content
+    // right below i.e res.send(content), But we need to instead attempt to
+    // redirect the user's request over to that new URL.
+    if (context.url) {
+      // So we're going to say, rather than attempt to send back the content
+      // right below, return and redirect the user, we're going to attach a
+      // status code of 301 to the request, which means we are temporarily
+      // redirecting the user and we are going to send them to the new URL
+      // of context.url like so.
+      return res.redirect(301, context.url);
+    }
+
     // Its totally okay to call the status before we send the response back
     if (context.notFound) {
       res.status(404);

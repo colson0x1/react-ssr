@@ -231,16 +231,22 @@ var fetchAdmins = exports.fetchAdmins = function fetchAdmins() {
 /* 2 */
 /***/ (function(module, exports) {
 
-module.exports = require("react-router-config");
+module.exports = require("react-redux");
 
 /***/ }),
 /* 3 */
 /***/ (function(module, exports) {
 
-module.exports = require("react-redux");
+module.exports = require("react-router-config");
 
 /***/ }),
 /* 4 */
+/***/ (function(module, exports) {
+
+module.exports = require("react-router-dom");
+
+/***/ }),
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -284,7 +290,7 @@ var _NotFoundPage = __webpack_require__(16);
 
 var _NotFoundPage2 = _interopRequireDefault(_NotFoundPage);
 
-var _AdminsListPage = __webpack_require__(26);
+var _AdminsListPage = __webpack_require__(17);
 
 var _AdminsListPage2 = _interopRequireDefault(_AdminsListPage);
 
@@ -317,12 +323,6 @@ exports.default = [_extends({}, _App2.default, {
 })];
 
 /***/ }),
-/* 5 */
-/***/ (function(module, exports) {
-
-module.exports = require("react-router-dom");
-
-/***/ }),
 /* 6 */
 /***/ (function(module, exports) {
 
@@ -347,21 +347,21 @@ var _express = __webpack_require__(10);
 
 var _express2 = _interopRequireDefault(_express);
 
-var _reactRouterConfig = __webpack_require__(2);
+var _reactRouterConfig = __webpack_require__(3);
 
 var _expressHttpProxy = __webpack_require__(11);
 
 var _expressHttpProxy2 = _interopRequireDefault(_expressHttpProxy);
 
-var _Routes = __webpack_require__(4);
+var _Routes = __webpack_require__(5);
 
 var _Routes2 = _interopRequireDefault(_Routes);
 
-var _renderer = __webpack_require__(17);
+var _renderer = __webpack_require__(19);
 
 var _renderer2 = _interopRequireDefault(_renderer);
 
-var _createStore = __webpack_require__(20);
+var _createStore = __webpack_require__(22);
 
 var _createStore2 = _interopRequireDefault(_createStore);
 
@@ -611,6 +611,20 @@ app.get('*', function (req, res) {
     // res.send(renderer(req, store, context));
 
     var content = (0, _renderer2.default)(req, store, context);
+
+    console.log('context', context);
+    // We'll look at the context.url property. If a URL property is defined on
+    // the context object, then we need to not send back all this content
+    // right below i.e res.send(content), But we need to instead attempt to
+    // redirect the user's request over to that new URL.
+    if (context.url) {
+      // So we're going to say, rather than attempt to send back the content
+      // right below, return and redirect the user, we're going to attach a
+      // status code of 301 to the request, which means we are temporarily
+      // redirecting the user and we are going to send them to the new URL
+      // of context.url like so.
+      return res.redirect(301, context.url);
+    }
 
     // Its totally okay to call the status before we send the response back
     if (context.notFound) {
@@ -1077,7 +1091,7 @@ var _react = __webpack_require__(0);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _reactRouterConfig = __webpack_require__(2);
+var _reactRouterConfig = __webpack_require__(3);
 
 var _Header = __webpack_require__(13);
 
@@ -1140,9 +1154,9 @@ var _react = __webpack_require__(0);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _reactRouterDom = __webpack_require__(5);
+var _reactRouterDom = __webpack_require__(4);
 
-var _reactRedux = __webpack_require__(3);
+var _reactRedux = __webpack_require__(2);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -1323,7 +1337,7 @@ var _react = __webpack_require__(0);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _reactRedux = __webpack_require__(3);
+var _reactRedux = __webpack_require__(2);
 
 var _actions = __webpack_require__(1);
 
@@ -1453,23 +1467,219 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
 var _react = __webpack_require__(0);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _server = __webpack_require__(18);
+var _reactRedux = __webpack_require__(2);
 
-var _reactRouterDom = __webpack_require__(5);
+var _actions = __webpack_require__(1);
 
-var _reactRedux = __webpack_require__(3);
+var _requireAuth = __webpack_require__(18);
 
-var _reactRouterConfig = __webpack_require__(2);
+var _requireAuth2 = _interopRequireDefault(_requireAuth);
 
-var _serializeJavascript = __webpack_require__(19);
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var AdminsListPage = function (_Component) {
+  _inherits(AdminsListPage, _Component);
+
+  function AdminsListPage() {
+    _classCallCheck(this, AdminsListPage);
+
+    return _possibleConstructorReturn(this, (AdminsListPage.__proto__ || Object.getPrototypeOf(AdminsListPage)).apply(this, arguments));
+  }
+
+  _createClass(AdminsListPage, [{
+    key: 'componentDidMount',
+    value: function componentDidMount() {
+      this.props.fetchAdmins();
+    }
+  }, {
+    key: 'renderAdmins',
+    value: function renderAdmins() {
+      return this.props.admins.map(function (admin) {
+        return _react2.default.createElement(
+          'li',
+          { key: admin.id },
+          admin.name
+        );
+      });
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      return _react2.default.createElement(
+        'div',
+        null,
+        _react2.default.createElement(
+          'h3',
+          { style: { color: 'springgreen' } },
+          'Protected list of admins'
+        ),
+        _react2.default.createElement(
+          'ul',
+          null,
+          this.renderAdmins()
+        )
+      );
+    }
+  }]);
+
+  return AdminsListPage;
+}(_react.Component);
+
+function mapStateToProps(_ref) {
+  var admins = _ref.admins;
+
+  return { admins: admins };
+}
+
+exports.default = {
+  // We do want to call the action creator from within this component just in
+  // case we ever have a user land on, say, our home route and then navigate
+  // over inside of our application to the admins route. So we'll pass in our
+  // fetchAdmins action creator
+  // Wrap AdminsListPage with requireAuth HOC!
+  // So now we have the initial connect statement that's going to take some
+  // props and try to pass it to this second argument here
+  // i.e requireAuth(AdminsListPage)
+  // So whatever props we get back from mapStateToProps right there or the
+  // connect function to the requireAuth function.
+  // {...this.props} in the requireAuth HOC will be the set of props that gets
+  // passed to the HOC from this connect function here!
+  component: (0, _reactRedux.connect)(mapStateToProps, { fetchAdmins: _actions.fetchAdmins })((0, _requireAuth2.default)(AdminsListPage)),
+  // We don't need receive the entire store. All we really care about is the
+  // dispatch function here. With a dispath fn, we will call and pass in the
+  // fetchAdmins action creator.
+  loadData: function loadData(_ref2) {
+    var dispatch = _ref2.dispatch;
+    return dispatch((0, _actions.fetchAdmins)());
+  }
+};
+
+/***/ }),
+/* 18 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = __webpack_require__(0);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _reactRedux = __webpack_require__(2);
+
+var _reactRouterDom = __webpack_require__(4);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /* @ Higher Order Component (HOC) */
+
+exports.default = function (ChildComponent) {
+  var RequireAuth = function (_Component) {
+    _inherits(RequireAuth, _Component);
+
+    function RequireAuth() {
+      _classCallCheck(this, RequireAuth);
+
+      return _possibleConstructorReturn(this, (RequireAuth.__proto__ || Object.getPrototypeOf(RequireAuth)).apply(this, arguments));
+    }
+
+    _createClass(RequireAuth, [{
+      key: 'render',
+      value: function render() {
+        // this.props.auth is the value produced by our authReducer and there's
+        // three possible values that it can return. It can return false, null and
+        // it can also return an object representing the current user.
+        // Now that object representing the current user is kind of hard to write
+        // into a case statement. So instead we'll just make it the default case.
+        switch (this.props.auth) {
+          case false:
+            // If the user is definitely not logged in, so if they are definitely
+            // not authenticated, well, in this case, we need to make sure that we
+            // kind of redirect the user to some other location inside of our
+            // application, or at least get them away from the page they're trying
+            // to access.
+            return _react2.default.createElement(_reactRouterDom.Redirect, { to: '/' });
+          case null:
+            // If auth property is null here, that means we have not yet fetched
+            // the user's authentication state.
+            return _react2.default.createElement(
+              'div',
+              null,
+              'Loading...'
+            );
+          default:
+            // Whenever we create a Higher Order Component, we need to make sure
+            // that we take any of the props that were passed to the Higher Order
+            // Component and pass them through to the Child Component as well.
+            // `{...this.props}` will make sure that any props that are passed to
+            // the HOC are forwarded on to the Child as well.
+            return _react2.default.createElement(ChildComponent, this.props);
+        }
+      }
+    }]);
+
+    return RequireAuth;
+  }(_react.Component);
+
+  function mapStateToProps(_ref) {
+    var auth = _ref.auth;
+
+    return { auth: auth };
+  }
+
+  return (0, _reactRedux.connect)(mapStateToProps)(RequireAuth);
+};
+
+/***/ }),
+/* 19 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _react = __webpack_require__(0);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _server = __webpack_require__(20);
+
+var _reactRouterDom = __webpack_require__(4);
+
+var _reactRedux = __webpack_require__(2);
+
+var _reactRouterConfig = __webpack_require__(3);
+
+var _serializeJavascript = __webpack_require__(21);
 
 var _serializeJavascript2 = _interopRequireDefault(_serializeJavascript);
 
-var _Routes = __webpack_require__(4);
+var _Routes = __webpack_require__(5);
 
 var _Routes2 = _interopRequireDefault(_Routes);
 
@@ -1521,6 +1731,19 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 // we are rendering our application with a BrowserRouter!
 // We need to default the value of `staticContext` to be an empty object there
 // if it wasn't defined as a prop.
+
+/* @ Handling Redirects
+ * If we attempt to visit the UsersListPage while we are not signed with
+ * JavaScript disabled/turned off, it appears that nothing actually gets
+ * rendered on the screen.
+ * So the issue right now is that when we render the page on the server, while
+ * we are not authenticated, the requireAuth hoc is going to attempt to render
+ * this Redirect tag there. (i.e return <Redirect to='/' />)
+ * When we show the Redirect tag on the server, our StaticRouter is going to
+ * add a new property to our context object.
+ * So it's not up to us to inspect that context object and decide whether or
+ * not we need to somehow redirect the user.
+ * */
 
 exports.default = function (req, store, context) {
   var content = (0, _server.renderToString)(_react2.default.createElement(
@@ -1943,19 +2166,19 @@ export default (req, store) => {
 // app and return it as a string
 
 /***/ }),
-/* 18 */
+/* 20 */
 /***/ (function(module, exports) {
 
 module.exports = require("react-dom/server");
 
 /***/ }),
-/* 19 */
+/* 21 */
 /***/ (function(module, exports) {
 
 module.exports = require("serialize-javascript");
 
 /***/ }),
-/* 20 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1967,7 +2190,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _redux = __webpack_require__(7);
 
-var _reduxThunk = __webpack_require__(21);
+var _reduxThunk = __webpack_require__(23);
 
 var _reduxThunk2 = _interopRequireDefault(_reduxThunk);
 
@@ -1975,7 +2198,7 @@ var _axios = __webpack_require__(6);
 
 var _axios2 = _interopRequireDefault(_axios);
 
-var _reducers = __webpack_require__(22);
+var _reducers = __webpack_require__(24);
 
 var _reducers2 = _interopRequireDefault(_reducers);
 
@@ -2104,13 +2327,13 @@ export default () => {
 */
 
 /***/ }),
-/* 21 */
+/* 23 */
 /***/ (function(module, exports) {
 
 module.exports = require("redux-thunk");
 
 /***/ }),
-/* 22 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2122,15 +2345,15 @@ Object.defineProperty(exports, "__esModule", {
 
 var _redux = __webpack_require__(7);
 
-var _usersReducer = __webpack_require__(23);
+var _usersReducer = __webpack_require__(25);
 
 var _usersReducer2 = _interopRequireDefault(_usersReducer);
 
-var _authReducer = __webpack_require__(24);
+var _authReducer = __webpack_require__(26);
 
 var _authReducer2 = _interopRequireDefault(_authReducer);
 
-var _adminsReducer = __webpack_require__(25);
+var _adminsReducer = __webpack_require__(27);
 
 var _adminsReducer2 = _interopRequireDefault(_adminsReducer);
 
@@ -2144,7 +2367,7 @@ exports.default = (0, _redux.combineReducers)({
 });
 
 /***/ }),
-/* 23 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2169,7 +2392,7 @@ exports.default = function () {
 };
 
 /***/ }),
-/* 24 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2194,7 +2417,7 @@ exports.default = function () {
 var _actions = __webpack_require__(1);
 
 /***/ }),
-/* 25 */
+/* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2216,202 +2439,6 @@ exports.default = function () {
     default:
       return state;
   }
-};
-
-/***/ }),
-/* 26 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _react = __webpack_require__(0);
-
-var _react2 = _interopRequireDefault(_react);
-
-var _reactRedux = __webpack_require__(3);
-
-var _actions = __webpack_require__(1);
-
-var _requireAuth = __webpack_require__(27);
-
-var _requireAuth2 = _interopRequireDefault(_requireAuth);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var AdminsListPage = function (_Component) {
-  _inherits(AdminsListPage, _Component);
-
-  function AdminsListPage() {
-    _classCallCheck(this, AdminsListPage);
-
-    return _possibleConstructorReturn(this, (AdminsListPage.__proto__ || Object.getPrototypeOf(AdminsListPage)).apply(this, arguments));
-  }
-
-  _createClass(AdminsListPage, [{
-    key: 'componentDidMount',
-    value: function componentDidMount() {
-      this.props.fetchAdmins();
-    }
-  }, {
-    key: 'renderAdmins',
-    value: function renderAdmins() {
-      return this.props.admins.map(function (admin) {
-        return _react2.default.createElement(
-          'li',
-          { key: admin.id },
-          admin.name
-        );
-      });
-    }
-  }, {
-    key: 'render',
-    value: function render() {
-      return _react2.default.createElement(
-        'div',
-        null,
-        _react2.default.createElement(
-          'h3',
-          { style: { color: 'springgreen' } },
-          'Protected list of admins'
-        ),
-        _react2.default.createElement(
-          'ul',
-          null,
-          this.renderAdmins()
-        )
-      );
-    }
-  }]);
-
-  return AdminsListPage;
-}(_react.Component);
-
-function mapStateToProps(_ref) {
-  var admins = _ref.admins;
-
-  return { admins: admins };
-}
-
-exports.default = {
-  // We do want to call the action creator from within this component just in
-  // case we ever have a user land on, say, our home route and then navigate
-  // over inside of our application to the admins route. So we'll pass in our
-  // fetchAdmins action creator
-  // Wrap AdminsListPage with requireAuth HOC!
-  // So now we have the initial connect statement that's going to take some
-  // props and try to pass it to this second argument here
-  // i.e requireAuth(AdminsListPage)
-  // So whatever props we get back from mapStateToProps right there or the
-  // connect function to the requireAuth function.
-  // {...this.props} in the requireAuth HOC will be the set of props that gets
-  // passed to the HOC from this connect function here!
-  component: (0, _reactRedux.connect)(mapStateToProps, { fetchAdmins: _actions.fetchAdmins })((0, _requireAuth2.default)(AdminsListPage)),
-  // We don't need receive the entire store. All we really care about is the
-  // dispatch function here. With a dispath fn, we will call and pass in the
-  // fetchAdmins action creator.
-  loadData: function loadData(_ref2) {
-    var dispatch = _ref2.dispatch;
-    return dispatch((0, _actions.fetchAdmins)());
-  }
-};
-
-/***/ }),
-/* 27 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _react = __webpack_require__(0);
-
-var _react2 = _interopRequireDefault(_react);
-
-var _reactRedux = __webpack_require__(3);
-
-var _reactRouterDom = __webpack_require__(5);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /* @ Higher Order Component (HOC) */
-
-exports.default = function (ChildComponent) {
-  var RequireAuth = function (_Component) {
-    _inherits(RequireAuth, _Component);
-
-    function RequireAuth() {
-      _classCallCheck(this, RequireAuth);
-
-      return _possibleConstructorReturn(this, (RequireAuth.__proto__ || Object.getPrototypeOf(RequireAuth)).apply(this, arguments));
-    }
-
-    _createClass(RequireAuth, [{
-      key: 'render',
-      value: function render() {
-        // this.props.auth is the value produced by our authReducer and there's
-        // three possible values that it can return. It can return false, null and
-        // it can also return an object representing the current user.
-        // Now that object representing the current user is kind of hard to write
-        // into a case statement. So instead we'll just make it the default case.
-        switch (this.props.auth) {
-          case false:
-            // If the user is definitely not logged in, so if they are definitely
-            // not authenticated, well, in this case, we need to make sure that we
-            // kind of redirect the user to some other location inside of our
-            // application, or at least get them away from the page they're trying
-            // to access.
-            return _react2.default.createElement(_reactRouterDom.Redirect, { to: '/' });
-          case null:
-            // If auth property is null here, that means we have not yet fetched
-            // the user's authentication state.
-            return _react2.default.createElement(
-              'div',
-              null,
-              'Loading...'
-            );
-          default:
-            // Whenever we create a Higher Order Component, we need to make sure
-            // that we take any of the props that were passed to the Higher Order
-            // Component and pass them through to the Child Component as well.
-            // `{...this.props}` will make sure that any props that are passed to
-            // the HOC are forwarded on to the Child as well.
-            return _react2.default.createElement(ChildComponent, this.props);
-        }
-      }
-    }]);
-
-    return RequireAuth;
-  }(_react.Component);
-
-  function mapStateToProps(_ref) {
-    var auth = _ref.auth;
-
-    return { auth: auth };
-  }
-
-  return (0, _reactRedux.connect)(mapStateToProps)(RequireAuth);
 };
 
 /***/ })
