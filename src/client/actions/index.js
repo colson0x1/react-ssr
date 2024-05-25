@@ -15,11 +15,27 @@ export const FETCH_USERS = 'fetch_users';
 // So now whenever we make a request inside of our action creator, rather than
 // using the base Axios library, we're going to use this customized Axios instance
 // called api.
+
+// So now as long as we make all of our request from our action creator file
+// i.e actions/index.js, as long as we make all of our requests that are
+// expected to go to our API with this `api` argument right here, no matter
+// whether we are on the client or the server, it will always somehow end up
+// making the request to the actual API hosted at Heroku app.
+//
+// NOTE: If we ever end up wanting to make a request to some target that is not
+// our API, we do have to import axios and use essentially a non configured
+// version of Axios.
+// i.e import axios from 'axios';
+// So we would not want to try to use this `api` object here we're receiving.
+// If we wanted to make a request to like some like Instagram API or something
+// like that or Snapchat API.
+// So this copy of Axios right here, this `api` instance is only for use with
+// our API. If we want to access anything else, we use the original axios library!
 export const fetchUsers = () => async (dispatch, getState, api) => {
   // const res = await axios.get('http://react-ssr-api.herokuapp.com/users/xss');
   // const res = await axios.get('http://react-ssr-api.herokuapp.com/users');
 
-  const res = await api.get('/user');
+  const res = await api.get('/users');
 
   dispatch({
     type: FETCH_USERS,

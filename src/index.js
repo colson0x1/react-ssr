@@ -32,7 +32,7 @@ app.use(
   '/api',
   proxy('http://react-ssr-api.herokuapp.com', {
     proxyReqOptDecorator(opts) {
-      opts.header['x-forwarded-host'] = 'localhost:3000';
+      opts.headers['x-forwarded-host'] = 'localhost:3000';
       return opts;
     },
   }),
@@ -71,7 +71,7 @@ app.use(express.static('public'));
 // to our renderer which is going to pass the request on to React Router and
 // allow that to decide what to do with it
 app.get('*', (req, res) => {
-  const store = createStore();
+  const store = createStore(req);
 
   // Some logic to initialize and load data into the store:
   // Take the current incoming request path, or in other words, the page that

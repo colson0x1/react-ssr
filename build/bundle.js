@@ -132,7 +132,7 @@ var app = (0, _express2.default)();
 // errors with the Google OAuth flow. That's all.
 app.use('/api', (0, _expressHttpProxy2.default)('http://react-ssr-api.herokuapp.com', {
   proxyReqOptDecorator: function proxyReqOptDecorator(opts) {
-    opts.header['x-forwarded-host'] = 'localhost:3000';
+    opts.headers['x-forwarded-host'] = 'localhost:3000';
     return opts;
   }
 }));
@@ -170,7 +170,7 @@ app.use(_express2.default.static('public'));
 // to our renderer which is going to pass the request on to React Router and
 // allow that to decide what to do with it
 app.get('*', function (req, res) {
-  var store = (0, _createStore2.default)();
+  var store = (0, _createStore2.default)(req);
 
   // Some logic to initialize and load data into the store:
   // Take the current incoming request path, or in other words, the page that
@@ -952,11 +952,62 @@ var _reduxThunk = __webpack_require__(11);
 
 var _reduxThunk2 = _interopRequireDefault(_reduxThunk);
 
+var _axios = __webpack_require__(15);
+
+var _axios2 = _interopRequireDefault(_axios);
+
 var _reducers = __webpack_require__(12);
 
 var _reducers2 = _interopRequireDefault(_reducers);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/* @ Redux on SSR
+ * Redux needs to be different configuration on Browser vs Server:
+ * We're going to create two different stores. And we're going to have one
+ * store for the browser bundle and one store for the server bundle.
+ */
+
+exports.default = function (req) {
+  var axiosInstance = _axios2.default.create({
+    // Because we are making a request on the server, we need the fully qualified
+    // URL to get access to our API at Heroku app
+    // We do not have the benefit of any proxy here. There is no proxy that's going
+    // to somehow take the request that is being issued on the server and send
+    // it on to Heroku app for us.
+    // So in this case our baseURL is going to be the full http:// ...
+    baseURL: 'http://react-ssr-api.herokuapp.com',
+    // So on this case, on the server with this Axios instance, we not only
+    // want to specify the base URL, but we also want to attach the cookie
+    // from the incoming request from the user's browser as well.
+    // So to do that, we're going to go back to catch all routes in index.js
+    // file and we're going to make sure that whenever we create our new store,
+    // we also pass in the original request that is coming from the user's browser.
+    // That req object right there has a tremendous amont of data nd it also
+    // includes within it all the cookies that were sent from the user's browser
+    // to this route handler or to our render server. So we're going to take this
+    // request object and we're gona pass it into the createStore function there!
+    // We'll receive that req object here and then we're going to add on to our
+    // Axios instance configuration right here, a custom header!!
+    // Here we are also setting an fall back of empty string because sometimes
+    // users will be making requests to our server without any cookie being set
+    // here i.e on req.get('cookie').
+    // So in that case, defaulting the value to be empty string prevents the
+    // header of undefined right here because if we have undefined, the request
+    // is going to crash.
+    headers: { cookie: req.get('cookie') || '' }
+  });
+
+  // So now whenever that above Axios instance is used to make requests to the
+  // API, the API is going to be absolutely tricked into thinking that the
+  // request is coming from a real user.
+  // So now the last thing we have to do is take that `axiosInstance` and
+  // get it to show up inside of our action creator, just like how we did
+  // on the client side.
+  var store = (0, _redux.createStore)(_reducers2.default, {}, (0, _redux.applyMiddleware)(_reduxThunk2.default.withExtraArgument(axiosInstance)));
+
+  return store;
+};
 
 // We're not importing Provider here like on client.js and that's because the
 // soul purpose of this file right now is to create the Redux store whereas
@@ -1025,16 +1076,13 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  * the HTML template, and then use that to initialize our store on the client
  * side!!!
  * */
-
-exports.default = function () {
-  var store = (0, _redux.createStore)(_reducers2.default, {}, (0, _redux.applyMiddleware)(_reduxThunk2.default));
+/*
+export default () => {
+  const store = createStore(reducers, {}, applyMiddleware(thunk));
 
   return store;
-}; /* @ Redux on SSR
-    * Redux needs to be different configuration on Browser vs Server:
-    * We're going to create two different stores. And we're going to have one
-    * store for the browser bundle and one store for the server bundle.
-    */
+};
+*/
 
 /***/ }),
 /* 10 */
@@ -1131,6 +1179,22 @@ var FETCH_USERS = exports.FETCH_USERS = 'fetch_users';
 // So now whenever we make a request inside of our action creator, rather than
 // using the base Axios library, we're going to use this customized Axios instance
 // called api.
+
+// So now as long as we make all of our request from our action creator file
+// i.e actions/index.js, as long as we make all of our requests that are
+// expected to go to our API with this `api` argument right here, no matter
+// whether we are on the client or the server, it will always somehow end up
+// making the request to the actual API hosted at Heroku app.
+//
+// NOTE: If we ever end up wanting to make a request to some target that is not
+// our API, we do have to import axios and use essentially a non configured
+// version of Axios.
+// i.e import axios from 'axios';
+// So we would not want to try to use this `api` object here we're receiving.
+// If we wanted to make a request to like some like Instagram API or something
+// like that or Snapchat API.
+// So this copy of Axios right here, this `api` instance is only for use with
+// our API. If we want to access anything else, we use the original axios library!
 var fetchUsers = exports.fetchUsers = function fetchUsers() {
   return function () {
     var _ref = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee(dispatch, getState, api) {
@@ -1140,7 +1204,7 @@ var fetchUsers = exports.fetchUsers = function fetchUsers() {
           switch (_context.prev = _context.next) {
             case 0:
               _context.next = 2;
-              return api.get('/user');
+              return api.get('/users');
 
             case 2:
               res = _context.sent;
