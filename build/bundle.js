@@ -456,92 +456,87 @@ app.get('*', function (req, res) {
     return route.loadData ? route.loadData(store) : null;
   });
 
-  // @ UnhandledPromiseRejectionWarning
-  // @ Rejection: Request failed with status code 401
-  // We get that error when we disable JavaScript and access the protected
-  // /admins route on the browser.
-  // The reason is how `Promise.all` works:
-  // If one thing goes wrong out of one dozen different requests or one dozen
-  // promises, then Promise.all() no longer calls the .then() statement.
-  // Instead it calls on or it calls a .catch() function instead.
-  // And as of now, we don't have .catch() statement chained to this Promise.all
-  // fn.
-  // So in other words, we have one request in this array of promises that is
-  // failing. The Promise.all statement says, okay, hey, something just went
-  // completely wrong. We need to start to execute some error handling code, but
-  // we don't have a `catch` statement chained on here, which is why we also
-  // start to see that other warning message here:
-  // Something it say, This is an unhandled promise rejection.
-  // In other words, we did not successfully or in any way, shape or form handle
-  // that failed request.
-  // And so that is why our request to our server, like the actual page loading
-  // request, just seems to hang because we kind of exit out of the optimal flow
-  // or the kind of critical path here and we never actually attempt to render
-  // the page and we never actually send any content back to the user.
+  /* @ Approach II */
+  // I don't recommend this second solution to use in our own application too.
+  // So the second solution really revolves around the fact that the big
+  // error right now is the Promise.all statement.
+  // So if anything goes wrong during this initial data loading request, we
+  // never execute the .then() function. So nothing here inside .then gets
+  // executed. So this second solution that I'm going to suggest here would
+  // be to say that, hey you know what? Even if something goes wrong during
+  // this initial data loading process right here, even if something goes poorly,
+  // let's still attempt to render the application. So even if something goes
+  // wrong, still attempt to render the application and send content back to the
+  // user.
+  // So for this solution, we're going to say that no matter what happens here,
+  // we're still going to run this .then() function. We're going to take this
+  // arrow function that we're passing to .then(), we're gonna cut the entire
+  // thing out and then we're going to assign it to a variable right above.
+  // Here we are calling it render. Then. with the Promise.all statement, we're
+  // going to say if everything goes correctly with waiting for these request,
+  // then run the render function (i.e .then()) and if anything goes poorly,
+  // still run the render function (i.e .catch())
+  //
+  // We're now saying that no matter what, we are going to always attempt to
+  // render our application and send a response back to the user.
+  // Back in the application, if we check the root route: localhost:300 and
+  // still being not authenticated, when we try to visit admin page. We get the
+  // text, Protected list of admins with Header.
+  // We don't see any list of admins there, but you know what? We at least
+  // showed some content to the user.
+  // So in this case, yes, things might be a little bit confusing. The user might
+  // be thinking where's my list of admins? And we are not very correctly or
+  // we're not really appropriately presenting any error message or anything
+  // to the user that says, Hey, here's why things are going wrong.
+  // But you know what? At least we have content showing up. At least we're
+  // not just showing some plain text that says, Hey, something went wrong.
+  // So I would say that this solution right here is at least better than the
+  // one we were just looking with approach I.
+  //
+  // However, there's still a really big hole with this solution, a really big
+  // problem.
+  // So if we really understand how Promise.all works, we're going to very
+  // quickly realize why this always attempt to render something.
+  // So the solution right here is really not going to be a good approach.
+  // So the key thing to remember is that as soon as Promise.all sees that
+  // one of the promises that we have passed to it has been rejected, the entire
+  // Promise.all statement fails and it instantly calls the .catch() function.
+  // So what's that really mean?
+  // Well, it means that if we have say three requests in the Promise.all,
+  // if we pass three promises to Promise.all and one succeeds and another fails,
+  // everything instantly goes to the catch function even if this third
+  // promise say was going to be successfully resolved.
+  // So in other words, we might be attempting to render our page before every
+  // request has been resolved or rejected, one or the other.
+  // In other words, we are rendering the application too early.
+  // So this is going to be a big issue if we are starting to access pages inside
+  // of our application that make a lot of data fetching requests. You know, let's
+  // say that we are attempting to make five requests to load a given page. If
+  // the very first request that gets responded to by our API results in an
+  // error, that means that the other four requests would not be allowed to
+  // finish and we would instantly attempt to render the page without getting
+  // any data back on those other four requests.
+  // So even though, yeah, we're at least showing some content here, it's still
+  // not the best approach in the world because ideally we would say, okay,
+  // you know, we understand that maybe this request right here failed, but
+  // let's at least wait for the other unresolved ones to finish before we go
+  // and attempt to render our application. So in other words, the issue with
+  // this approach right now is that we are attempting to just render the
+  // application too soon. We're not allowing other requests to be completed.
+  // We can easily imagine that if we were making maney requests, its very
+  // possible that the very first request that fails, everything else gets
+  // ignored and we instantly render the page and send the result back to the
+  // user. Ideally, we would wait for as many requests to be completed, either
+  // with success or error, so we would wait for those to be completed before
+  // attempting to render the page.
+  //
+  // So that's what really leads us into our third solution, the solution where
+  // we are still going to still pass all these requests to Promise.all, but
+  // this time around we're going to figure out a way to let every request to
+  // be either resolved or rejected before attempting to render the page!
+  //
 
-  // Approach I: Add on a simple catch statement.
-  // This is not a thing that I recommend but we're going to see this
-  // approach in a lot of server side rendering boilerplates out there.
-  // So a lot of other boilerplates or a lot of other engineers take this
-  // approach and we'll see why I recommend, we not do it.
-  // So inside this thing, we're going to simply form up some type of error
-  // message and send it back to the user. So we take res object and we'll just
-  // send some type of message and say something went wrong.
-  // Now the key thing here is that with this `catch`, statement right here,
-  // so with this catch statement, we're kind of assuming that we cannot
-  // successfully render the page. So we're not going to attempt to render the
-  // page here because we are just assuming that, hey, something went wrong.
-  // So we are going to just abandon the entire server side rendering process
-  // and show some error to the user.
-  // So checking localhost:3000/admins and making sure we are logged out and
-  // JS is disabled,
-  // Now it says, 'Something went wrong' on the brower.
-  //
-  // Why is it a bad approach now?
-  // This at least shows an error message to the user but why would this not be
-  // a good approach is, well this one's kind of obvious. This would be a very
-  // poor approach inside of a real application, because in this case, yeah,
-  // something went wrong. But the error is due to something that the user can
-  // very easily fix. Like we don't want to show the user an error message here.
-  // We know what went wrong. We are showing an error message simply because
-  // the user was not authenticated. So personally, I believe that if something
-  // goes wrong during the server side rendering process, we should not just
-  // give up, we should not quit and just say, hey like we did our best. But
-  // that's really it. Like something went wrong. Try again later because this
-  // error message that the user is seeing right here is never going to just
-  // automatically fix itself.
-  // We know, we're not really presenting anything to the user here that says,
-  // Oh, we need to log in, we need to sign in to the application to visit this
-  // page. So personally I think that just kind of bailing early and showing
-  // an error message to the user, is not appropriate solution here at all!
-  //
-  // There's really nothing that we are showing there that is goig to indicate to
-  // the user, hey just sign in and you'll be okay. And we can think, yeah
-  // why don't we just show a message to the usre, like maybe figure out exactly
-  // what requests went wrong out of our list of promises here and then put an
-  // error message in here that says, 'Hey, you need to log in to visit this'.
-  // Well, the easy answer to dhat is sometimes requests might fail without any
-  // reason that we can figure out. In this particular case, yes, we know that
-  // the request failed because the user was not signed in, but maybe the request
-  // failed for some reason that we can't predict! Like maybe the API is just
-  // having issues. Maybe our API is temporarily down for like five minutes or
-  // something like that. Now in that case, if something went wrong, I still
-  // don't really feel like we want to abandon the entire server side rendering
-  // flow and show a generic error message.
-  // I feel like we should still attempt to render our application, at lest get
-  // like our header on the screen and our footer on the screen. And maybe,
-  // we don't show any actual content in there but maybe we at least get our
-  // application showing up and then show a generic error message inside there.
-  // So in other words, short story, long story short here, I really don't think
-  // that this very generic kind of escape hatch right here is the right approach.
-  // I think that we need to still attempt to render our application and say
-  // to the user, hey, something went wrong with this very specific data fetch
-  // request. Maybe we try logging in or whatever it is, but I don't want to just
-  // completely abandon the rendering attempt.
-  // This is the approach 1st, that I do not recommend even though we will see
-  // a lot of other server side rendering frameworks, kind of taking this
-  // approach right here!
-  Promise.all(promises).then(function () {
+  var render = function render() {
     var context = {};
 
     // Right here is when it is actually a very good time to actually render
@@ -559,9 +554,9 @@ app.get('*', function (req, res) {
     }
 
     res.send(content);
-  }).catch(function () {
-    res.send('Something went wrong');
-  });
+  };
+
+  Promise.all(promises).then(render).catch(render);
 
   console.log(promises);
 });
@@ -769,6 +764,120 @@ app.get('/', (req, res) => {
 app.listen(3000, () => {
   console.log('Listening on port 3000');
 });
+*/
+
+/* @ UnhandledPromiseRejectionWarning */
+/* @ Rejection: Request failed with status code 401 */
+// ->
+// We get that error when we disable JavaScript and access the protected
+// /admins route on the browser.
+// The reason is how `Promise.all` works:
+// If one thing goes wrong out of one dozen different requests or one dozen
+// promises, then Promise.all() no longer calls the .then() statement.
+// Instead it calls on or it calls a .catch() function instead.
+// And as of now, we don't have .catch() statement chained to this Promise.all
+// fn.
+// So in other words, we have one request in this array of promises that is
+// failing. The Promise.all statement says, okay, hey, something just went
+// completely wrong. We need to start to execute some error handling code, but
+// we don't have a `catch` statement chained on here, which is why we also
+// start to see that other warning message here:
+// Something it say, This is an unhandled promise rejection.
+// In other words, we did not successfully or in any way, shape or form handle
+// that failed request.
+// And so that is why our request to our server, like the actual page loading
+// request, just seems to hang because we kind of exit out of the optimal flow
+// or the kind of critical path here and we never actually attempt to render
+// the page and we never actually send any content back to the user.
+
+/* @ Approach I: Add on a simple catch statement. */
+
+// This is not a thing that I recommend but we're going to see this
+// approach in a lot of server side rendering boilerplates out there.
+// So a lot of other boilerplates or a lot of other engineers take this
+// approach and we'll see why I recommend, we not do it.
+// So inside this thing, we're going to simply form up some type of error
+// message and send it back to the user. So we take res object and we'll just
+// send some type of message and say something went wrong.
+// Now the key thing here is that with this `catch`, statement right here,
+// so with this catch statement, we're kind of assuming that we cannot
+// successfully render the page. So we're not going to attempt to render the
+// page here because we are just assuming that, hey, something went wrong.
+// So we are going to just abandon the entire server side rendering process
+// and show some error to the user.
+// So checking localhost:3000/admins and making sure we are logged out and
+// JS is disabled,
+// Now it says, 'Something went wrong' on the brower.
+//
+// Why is it a bad approach now?
+// This at least shows an error message to the user but why would this not be
+// a good approach is, well this one's kind of obvious. This would be a very
+// poor approach inside of a real application, because in this case, yeah,
+// something went wrong. But the error is due to something that the user can
+// very easily fix. Like we don't want to show the user an error message here.
+// We know what went wrong. We are showing an error message simply because
+// the user was not authenticated. So personally, I believe that if something
+// goes wrong during the server side rendering process, we should not just
+// give up, we should not quit and just say, hey like we did our best. But
+// that's really it. Like something went wrong. Try again later because this
+// error message that the user is seeing right here is never going to just
+// automatically fix itself.
+// We know, we're not really presenting anything to the user here that says,
+// Oh, we need to log in, we need to sign in to the application to visit this
+// page. So personally I think that just kind of bailing early and showing
+// an error message to the user, is not appropriate solution here at all!
+//
+// There's really nothing that we are showing there that is goig to indicate to
+// the user, hey just sign in and you'll be okay. And we can think, yeah
+// why don't we just show a message to the usre, like maybe figure out exactly
+// what requests went wrong out of our list of promises here and then put an
+// error message in here that says, 'Hey, you need to log in to visit this'.
+// Well, the easy answer to dhat is sometimes requests might fail without any
+// reason that we can figure out. In this particular case, yes, we know that
+// the request failed because the user was not signed in, but maybe the request
+// failed for some reason that we can't predict! Like maybe the API is just
+// having issues. Maybe our API is temporarily down for like five minutes or
+// something like that. Now in that case, if something went wrong, I still
+// don't really feel like we want to abandon the entire server side rendering
+// flow and show a generic error message.
+// I feel like we should still attempt to render our application, at lest get
+// like our header on the screen and our footer on the screen. And maybe,
+// we don't show any actual content in there but maybe we at least get our
+// application showing up and then show a generic error message inside there.
+// So in other words, short story, long story short here, I really don't think
+// that this very generic kind of escape hatch right here is the right approach.
+// I think that we need to still attempt to render our application and say
+// to the user, hey, something went wrong with this very specific data fetch
+// request. Maybe we try logging in or whatever it is, but I don't want to just
+// completely abandon the rendering attempt.
+// This is the approach 1st, that I do not recommend even though we will see
+// a lot of other server side rendering frameworks, kind of taking this
+// approach right here!
+
+/*
+Promise.all(promises)
+  .then(() => {
+    const context = {};
+
+    // Right here is when it is actually a very good time to actually render
+    // our application.
+    // So now after all of our data loading functions have finished, we will
+    // render the application and hopefully get all of our content to show up
+    // on the screen as HTML.
+    // res.send(renderer(req, store, context));
+
+    const content = renderer(req, store, context);
+
+    // Its totally okay to call the status before we send the response back
+    if (context.notFound) {
+      res.status(404);
+    }
+
+    res.send(content);
+  })
+  .catch(() => {
+    res.send('Something went wrong');
+  });
 */
 
 /***/ }),
