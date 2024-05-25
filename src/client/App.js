@@ -33,5 +33,5 @@ const App = ({ route }) => {
 // routes file!
 export default {
   component: App,
-  loadData: ({ dispatch }) => dispatch(fetchCurrentUser),
+  loadData: ({ dispatch }) => dispatch(fetchCurrentUser()),
 };
