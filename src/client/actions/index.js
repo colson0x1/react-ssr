@@ -45,12 +45,23 @@ export const fetchUsers = () => async (dispatch, getState, api) => {
 
 // Action creator to fetch the current authentication status.
 export const FETCH_CURRENT_USER = 'fetch_current_user';
-
 export const fetchCurrentUser = () => async (dispatch, getState, api) => {
   const res = await api.get('/current_user');
 
   dispatch({
     type: FETCH_CURRENT_USER,
+    payload: res,
+  });
+};
+
+export const FETCH_ADMINS = 'fetch_admins';
+// fetchAdmins is going to be an arrow function that returns asynchronous
+// Redux Thunk function which receives three arguments here
+export const fetchAdmins = () => async (dispatch, getState, api) => {
+  const res = await api.get('/admins');
+
+  dispatch({
+    type: FETCH_ADMINS,
     payload: res,
   });
 };
