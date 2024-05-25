@@ -40333,6 +40333,10 @@ var _reactRedux = __webpack_require__(119);
 
 var _actions = __webpack_require__(77);
 
+var _requireAuth = __webpack_require__(491);
+
+var _requireAuth2 = _interopRequireDefault(_requireAuth);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -40400,7 +40404,15 @@ exports.default = {
   // case we ever have a user land on, say, our home route and then navigate
   // over inside of our application to the admins route. So we'll pass in our
   // fetchAdmins action creator
-  component: (0, _reactRedux.connect)(mapStateToProps, { fetchAdmins: _actions.fetchAdmins })(AdminsListPage),
+  // Wrap AdminsListPage with requireAuth HOC!
+  // So now we have the initial connect statement that's going to take some
+  // props and try to pass it to this second argument here
+  // i.e requireAuth(AdminsListPage)
+  // So whatever props we get back from mapStateToProps right there or the
+  // connect function to the requireAuth function.
+  // {...this.props} in the requireAuth HOC will be the set of props that gets
+  // passed to the HOC from this connect function here!
+  component: (0, _reactRedux.connect)(mapStateToProps, { fetchAdmins: _actions.fetchAdmins })((0, _requireAuth2.default)(AdminsListPage)),
   // We don't need receive the entire store. All we really care about is the
   // dispatch function here. With a dispath fn, we will call and pass in the
   // fetchAdmins action creator.
@@ -40408,6 +40420,92 @@ exports.default = {
     var dispatch = _ref2.dispatch;
     return dispatch((0, _actions.fetchAdmins)());
   }
+};
+
+/***/ }),
+/* 491 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = __webpack_require__(6);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _reactRedux = __webpack_require__(119);
+
+var _reactRouterDom = __webpack_require__(167);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /* @ Higher Order Component (HOC) */
+
+exports.default = function (ChildComponent) {
+  var RequireAuth = function (_Component) {
+    _inherits(RequireAuth, _Component);
+
+    function RequireAuth() {
+      _classCallCheck(this, RequireAuth);
+
+      return _possibleConstructorReturn(this, (RequireAuth.__proto__ || Object.getPrototypeOf(RequireAuth)).apply(this, arguments));
+    }
+
+    _createClass(RequireAuth, [{
+      key: 'render',
+      value: function render() {
+        // this.props.auth is the value produced by our authReducer and there's
+        // three possible values that it can return. It can return false, null and
+        // it can also return an object representing the current user.
+        // Now that object representing the current user is kind of hard to write
+        // into a case statement. So instead we'll just make it the default case.
+        switch (this.props.auth) {
+          case false:
+            // If the user is definitely not logged in, so if they are definitely
+            // not authenticated, well, in this case, we need to make sure that we
+            // kind of redirect the user to some other location inside of our
+            // application, or at least get them away from the page they're trying
+            // to access.
+            return _react2.default.createElement(_reactRouterDom.Redirect, { to: '/' });
+          case null:
+            // If auth property is null here, that means we have not yet fetched
+            // the user's authentication state.
+            return _react2.default.createElement(
+              'div',
+              null,
+              'Loading...'
+            );
+          default:
+            // Whenever we create a Higher Order Component, we need to make sure
+            // that we take any of the props that were passed to the Higher Order
+            // Component and pass them through to the Child Component as well.
+            // `{...this.props}` will make sure that any props that are passed to
+            // the HOC are forwarded on to the Child as well.
+            return _react2.default.createElement(ChildComponent, this.props);
+        }
+      }
+    }]);
+
+    return RequireAuth;
+  }(_react.Component);
+
+  function mapStateToProps(_ref) {
+    var auth = _ref.auth;
+
+    return { auth: auth };
+  }
+
+  return (0, _reactRedux.connect)(mapStateToProps)(RequireAuth);
 };
 
 /***/ })
