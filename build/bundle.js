@@ -574,6 +574,31 @@ app.get('*', function (req, res) {
   // get some content on the screen, but still we kind of want to make sure
   // that the user understands why we are not showing a list of admins to them.
   // Like why is that list blank right there on the browser.
+  //
+  // We do that with RequireAuth component!
+  // In order to correctly handle the case in which a user tries to vist the
+  // admins list page when they are not authenticated, I think that we should
+  // introduce a new component called `requireAuth`.
+  // The requireAuth component is not going to make any data fetching requests
+  // itself. Instead it's giong to inspect the state that was fetched by the
+  // App component and the AdminsListPage and it's going to decide how it should
+  // handle the user. So if the user has a auth piece of state that says that
+  // they are not authenticated, we should probably write some code inside that
+  // requireAuth component right there to redirect them away or redirect them to
+  // some other page that instructs them that they need to sign in to the application.
+  //
+  // requireAuth is going to be a Higher Order Component (HOC).
+  // A higher order component is a functoin that takes a component, so we're
+  // going to create, we're going to take our AdminsListPage, we're going to
+  // call this requireAuth Higher Order Component with the AdminsListPage, and
+  // that's going to return a kind of enhanced AdminsListPage or a version of our
+  // AdminsListPage that has the ability to require that user is authenticated
+  // in order to use it!
+  // Higher Order Components are extremely common to find around authentication
+  // or any type of redirect or kind of validation logic!!
+  // HOC are always functions and usually whenever we have a function being
+  // exported from a file, we name that file with a lowercase character.
+  // `src/client/components/hocs/requireAuth.js`
 
   Promise.all(promises).then(function () {
     var context = {};
