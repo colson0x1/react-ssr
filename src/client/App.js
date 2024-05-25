@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { renderRoutes } from 'react-router-config';
+import Header from './components/Header';
 
 // We're going to call renderRoutes as a function and then into it, we're going
 // to pass in any routes that get mactched during the match routes process, will
@@ -14,7 +15,7 @@ import { renderRoutes } from 'react-router-config';
 const App = ({ route }) => {
   return (
     <div>
-      <h1 style={{ color: 'orangered', fontWeight: 800 }}>Header</h1>
+      <Header />
       {renderRoutes(route.routes)}
     </div>
   );

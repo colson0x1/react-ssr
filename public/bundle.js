@@ -39998,6 +39998,10 @@ var _react2 = _interopRequireDefault(_react);
 
 var _reactRouterConfig = __webpack_require__(479);
 
+var _Header = __webpack_require__(488);
+
+var _Header2 = _interopRequireDefault(_Header);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 // We're going to call renderRoutes as a function and then into it, we're going
@@ -40008,19 +40012,13 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 // So now any child routes that are matched will be automatically turned into
 // route components by this renderRoutes function call and basically everything
 // shows up!
-/* @ Root Component */
-
 var App = function App(_ref) {
   var route = _ref.route;
 
   return _react2.default.createElement(
     'div',
     null,
-    _react2.default.createElement(
-      'h1',
-      { style: { color: 'orangered', fontWeight: 800 } },
-      'Header'
-    ),
+    _react2.default.createElement(_Header2.default, null),
     (0, _reactRouterConfig.renderRoutes)(route.routes)
   );
 };
@@ -40034,8 +40032,41 @@ var App = function App(_ref) {
 // do that. So we're going to export this thing as though it were a page.
 // Now we'll be able to use this thing with same spread syntax inside of our
 // routes file!
+/* @ Root Component */
+
 exports.default = {
   component: App
+};
+
+/***/ }),
+/* 488 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _react = __webpack_require__(1);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _reactRouterDom = __webpack_require__(30);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = function () {
+  return _react2.default.createElement(
+    'div',
+    null,
+    _react2.default.createElement(
+      _reactRouterDom.Link,
+      { to: '/' },
+      'React SSR'
+    )
+  );
 };
 
 /***/ })
