@@ -15,6 +15,7 @@ import HomePage from './pages/HomePage';
 /* import UsersListPage, { loadData } from './pages/UsersListPage'; */
 import UsersListPage from './pages/UsersListPage';
 import NotFoundPage from './pages/NotFoundPage';
+import AdminsListPage from './pages/AdminsListPage';
 
 // We always want this App component to be visible and we definitely want any
 // other component that is going to be shown inside of our application to be
@@ -37,6 +38,10 @@ export default [
         path: '/',
         // component: HomePage,
         exact: true,
+      },
+      {
+        ...AdminsListPage,
+        path: '/admins',
       },
       {
         ...UsersListPage,
