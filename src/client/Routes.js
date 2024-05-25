@@ -14,6 +14,7 @@ import App from './App';
 import HomePage from './pages/HomePage';
 /* import UsersListPage, { loadData } from './pages/UsersListPage'; */
 import UsersListPage from './pages/UsersListPage';
+import NotFoundPage from './pages/NotFoundPage';
 
 // We always want this App component to be visible and we definitely want any
 // other component that is going to be shown inside of our application to be
@@ -42,6 +43,11 @@ export default [
         // loadData,
         path: '/users',
         // component: UsersListPage,
+      },
+      {
+        // By not providing a path, React Router will decide to show this
+        // component if it cannot match any of the other routes that are defined.
+        ...NotFoundPage,
       },
     ],
   },
