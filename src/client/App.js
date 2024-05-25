@@ -3,6 +3,7 @@
 import React from 'react';
 import { renderRoutes } from 'react-router-config';
 import Header from './components/Header';
+import { fetchCurrentUser } from './actions';
 
 // We're going to call renderRoutes as a function and then into it, we're going
 // to pass in any routes that get mactched during the match routes process, will
@@ -32,4 +33,5 @@ const App = ({ route }) => {
 // routes file!
 export default {
   component: App,
+  loadData: ({ dispatch }) => dispatch(fetchCurrentUser),
 };

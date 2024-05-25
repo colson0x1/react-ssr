@@ -40044,6 +40044,8 @@ var _Header = __webpack_require__(488);
 
 var _Header2 = _interopRequireDefault(_Header);
 
+var _actions = __webpack_require__(126);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 // We're going to call renderRoutes as a function and then into it, we're going
@@ -40054,6 +40056,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 // So now any child routes that are matched will be automatically turned into
 // route components by this renderRoutes function call and basically everything
 // shows up!
+/* @ Root Component */
+
 var App = function App(_ref) {
   var route = _ref.route;
 
@@ -40074,10 +40078,12 @@ var App = function App(_ref) {
 // do that. So we're going to export this thing as though it were a page.
 // Now we'll be able to use this thing with same spread syntax inside of our
 // routes file!
-/* @ Root Component */
-
 exports.default = {
-  component: App
+  component: App,
+  loadData: function loadData(_ref2) {
+    var dispatch = _ref2.dispatch;
+    return dispatch(_actions.fetchCurrentUser);
+  }
 };
 
 /***/ }),
