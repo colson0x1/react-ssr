@@ -97,12 +97,23 @@ app.get('*', (req, res) => {
   });
 
   Promise.all(promises).then(() => {
+    const context = {};
+
     // Right here is when it is actually a very good time to actually render
     // our application.
     // So now after all of our data loading functions have finished, we will
     // render the application and hopefully get all of our content to show up
     // on the screen as HTML.
-    res.send(renderer(req, store));
+    // res.send(renderer(req, store, context));
+
+    const content = renderer(req, store, context);
+
+    // Its totally okay to call the status before we send the response back
+    if (context.notFound) {
+      res.status(404);
+    }
+
+    res.send(content);
   });
 
   console.log(promises);

@@ -60,7 +60,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 2);
+/******/ 	return __webpack_require__(__webpack_require__.s = 8);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -71,38 +71,255 @@ module.exports = require("react");
 
 /***/ }),
 /* 1 */
-/***/ (function(module, exports) {
-
-module.exports = require("react-router-dom");
-
-/***/ }),
-/* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-__webpack_require__(17);
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.fetchCurrentUser = exports.FETCH_CURRENT_USER = exports.fetchUsers = exports.FETCH_USERS = undefined;
 
-var _express = __webpack_require__(3);
+var _axios = __webpack_require__(6);
+
+var _axios2 = _interopRequireDefault(_axios);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
+
+// Fetch list of users
+var FETCH_USERS = exports.FETCH_USERS = 'fetch_users';
+
+// This fn gets automatically invoked by Redux Thunk. When Redux Thunk calls this
+// function, it's now going to pass in three separate arguments. The first argument
+// will be the dispatch function, the second argument will be the getState fn and
+// the third is going to be this new little Axios instance that we passed in as
+// third extra argument in client.js
+// Now rathre than refer to it as `axiosInstance` here, which isn't like super
+// clear what that really means, we're renaming this argument to simply be just
+// `api` so that it'll be really clear that we can use this argument right here
+// to get access to our API!
+// So now whenever we make a request inside of our action creator, rather than
+// using the base Axios library, we're going to use this customized Axios instance
+// called api.
+
+// So now as long as we make all of our request from our action creator file
+// i.e actions/index.js, as long as we make all of our requests that are
+// expected to go to our API with this `api` argument right here, no matter
+// whether we are on the client or the server, it will always somehow end up
+// making the request to the actual API hosted at Heroku app.
+//
+// NOTE: If we ever end up wanting to make a request to some target that is not
+// our API, we do have to import axios and use essentially a non configured
+// version of Axios.
+// i.e import axios from 'axios';
+// So we would not want to try to use this `api` object here we're receiving.
+// If we wanted to make a request to like some like Instagram API or something
+// like that or Snapchat API.
+// So this copy of Axios right here, this `api` instance is only for use with
+// our API. If we want to access anything else, we use the original axios library!
+var fetchUsers = exports.fetchUsers = function fetchUsers() {
+  return function () {
+    var _ref = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee(dispatch, getState, api) {
+      var res;
+      return regeneratorRuntime.wrap(function _callee$(_context) {
+        while (1) {
+          switch (_context.prev = _context.next) {
+            case 0:
+              _context.next = 2;
+              return api.get('/users');
+
+            case 2:
+              res = _context.sent;
+
+
+              dispatch({
+                type: FETCH_USERS,
+                payload: res
+              });
+
+            case 4:
+            case 'end':
+              return _context.stop();
+          }
+        }
+      }, _callee, undefined);
+    }));
+
+    return function (_x, _x2, _x3) {
+      return _ref.apply(this, arguments);
+    };
+  }();
+};
+
+// Action creator to fetch the current authentication status.
+var FETCH_CURRENT_USER = exports.FETCH_CURRENT_USER = 'fetch_current_user';
+
+var fetchCurrentUser = exports.fetchCurrentUser = function fetchCurrentUser() {
+  return function () {
+    var _ref2 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2(dispatch, getState, api) {
+      var res;
+      return regeneratorRuntime.wrap(function _callee2$(_context2) {
+        while (1) {
+          switch (_context2.prev = _context2.next) {
+            case 0:
+              _context2.next = 2;
+              return api.get('/current_user');
+
+            case 2:
+              res = _context2.sent;
+
+
+              dispatch({
+                type: FETCH_CURRENT_USER,
+                payload: res
+              });
+
+            case 4:
+            case 'end':
+              return _context2.stop();
+          }
+        }
+      }, _callee2, undefined);
+    }));
+
+    return function (_x4, _x5, _x6) {
+      return _ref2.apply(this, arguments);
+    };
+  }();
+};
+
+/***/ }),
+/* 2 */
+/***/ (function(module, exports) {
+
+module.exports = require("react-router-config");
+
+/***/ }),
+/* 3 */
+/***/ (function(module, exports) {
+
+module.exports = require("react-redux");
+
+/***/ }),
+/* 4 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; // This is a file that's going to be shared between both the client and the
+// server side codebases.
+
+/* @ Prevent naming collison for loadData fn for multiple pages */
+// Approach:
+// Rather than exporting the component and the load data function separately,
+// we're going to export one single object from each page component file.
+// And in that object we will wrap up both the component and the load data fn!
+// We'll then use our ES2015 spread syntax to dump both the component and the
+// load data definition into our route structure.
+
+/* import UsersListPage, { loadData } from './pages/UsersListPage'; */
+
+
+var _react = __webpack_require__(0);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _App = __webpack_require__(12);
+
+var _App2 = _interopRequireDefault(_App);
+
+var _HomePage = __webpack_require__(14);
+
+var _HomePage2 = _interopRequireDefault(_HomePage);
+
+var _UsersListPage = __webpack_require__(15);
+
+var _UsersListPage2 = _interopRequireDefault(_UsersListPage);
+
+var _NotFoundPage = __webpack_require__(16);
+
+var _NotFoundPage2 = _interopRequireDefault(_NotFoundPage);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+// We always want this App component to be visible and we definitely want any
+// other component that is going to be shown inside of our application to be
+// rendered inside of the App.
+
+exports.default = [_extends({}, _App2.default, {
+  // We did not tie a path to this App component. That means it will always
+  // be displayed on the screen no matter what.
+
+  // Last thing we have to do is, to make sure whenever we match one of these
+  // child routes, they end up getting rendered by the App. So the App component
+  // right there (i.e ...App), is going to be passed the child component
+  // as a property and it's going to be up to the App component to figure out
+  // that it needs to actually render whatever routes got matched as children.
+  routes: [_extends({}, _HomePage2.default, {
+    path: '/',
+    // component: HomePage,
+    exact: true
+  }), _extends({}, _UsersListPage2.default, {
+    // loadData,
+    path: '/users'
+    // component: UsersListPage,
+  }), _extends({}, _NotFoundPage2.default)]
+})];
+
+/***/ }),
+/* 5 */
+/***/ (function(module, exports) {
+
+module.exports = require("react-router-dom");
+
+/***/ }),
+/* 6 */
+/***/ (function(module, exports) {
+
+module.exports = require("axios");
+
+/***/ }),
+/* 7 */
+/***/ (function(module, exports) {
+
+module.exports = require("redux");
+
+/***/ }),
+/* 8 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+__webpack_require__(9);
+
+var _express = __webpack_require__(10);
 
 var _express2 = _interopRequireDefault(_express);
 
-var _reactRouterConfig = __webpack_require__(18);
+var _reactRouterConfig = __webpack_require__(2);
 
-var _expressHttpProxy = __webpack_require__(22);
+var _expressHttpProxy = __webpack_require__(11);
 
 var _expressHttpProxy2 = _interopRequireDefault(_expressHttpProxy);
 
-var _Routes = __webpack_require__(7);
+var _Routes = __webpack_require__(4);
 
 var _Routes2 = _interopRequireDefault(_Routes);
 
-var _renderer = __webpack_require__(4);
+var _renderer = __webpack_require__(17);
 
 var _renderer2 = _interopRequireDefault(_renderer);
 
-var _createStore = __webpack_require__(9);
+var _createStore = __webpack_require__(20);
 
 var _createStore2 = _interopRequireDefault(_createStore);
 
@@ -198,12 +415,23 @@ app.get('*', function (req, res) {
   });
 
   Promise.all(promises).then(function () {
+    var context = {};
+
     // Right here is when it is actually a very good time to actually render
     // our application.
     // So now after all of our data loading functions have finished, we will
     // render the application and hopefully get all of our content to show up
     // on the screen as HTML.
-    res.send((0, _renderer2.default)(req, store));
+    // res.send(renderer(req, store, context));
+
+    var content = (0, _renderer2.default)(req, store, context);
+
+    // Its totally okay to call the status before we send the response back
+    if (context.notFound) {
+      res.status(404);
+    }
+
+    res.send(content);
   });
 
   console.log(promises);
@@ -415,13 +643,25 @@ app.listen(3000, () => {
 */
 
 /***/ }),
-/* 3 */
+/* 9 */
+/***/ (function(module, exports) {
+
+module.exports = require("babel-polyfill");
+
+/***/ }),
+/* 10 */
 /***/ (function(module, exports) {
 
 module.exports = require("express");
 
 /***/ }),
-/* 4 */
+/* 11 */
+/***/ (function(module, exports) {
+
+module.exports = require("express-http-proxy");
+
+/***/ }),
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -435,31 +675,458 @@ var _react = __webpack_require__(0);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _server = __webpack_require__(5);
+var _reactRouterConfig = __webpack_require__(2);
 
-var _reactRouterDom = __webpack_require__(1);
+var _Header = __webpack_require__(13);
 
-var _reactRedux = __webpack_require__(6);
+var _Header2 = _interopRequireDefault(_Header);
 
-var _reactRouterConfig = __webpack_require__(18);
+var _actions = __webpack_require__(1);
 
-var _serializeJavascript = __webpack_require__(21);
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+// We're going to call renderRoutes as a function and then into it, we're going
+// to pass in any routes that get mactched during the match routes process, will
+// be passed into the app component as a prop called `route`.
+// So this route right here contains a property on it called `routes` and that is
+// the collection of components that we need to render inside of the App.
+// So now any child routes that are matched will be automatically turned into
+// route components by this renderRoutes function call and basically everything
+// shows up!
+/* @ Root Component */
+
+var App = function App(_ref) {
+  var route = _ref.route;
+
+  return _react2.default.createElement(
+    'div',
+    null,
+    _react2.default.createElement(_Header2.default, null),
+    (0, _reactRouterConfig.renderRoutes)(route.routes)
+  );
+};
+
+// Now even though this is not strictly a page component per se, we're going to
+// have it follow the same convention for exports as our page components because
+// we might want to eventually tie some data loading to this App component.
+// We would want to tie some data loading to this thing if there was some type
+// of action creator or some type of request that we wanted to execute for
+// every single page inside of our application, and we might eventually want to
+// do that. So we're going to export this thing as though it were a page.
+// Now we'll be able to use this thing with same spread syntax inside of our
+// routes file!
+exports.default = {
+  component: App,
+  loadData: function loadData(_ref2) {
+    var dispatch = _ref2.dispatch;
+    return dispatch((0, _actions.fetchCurrentUser)());
+  }
+};
+
+/***/ }),
+/* 13 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _react = __webpack_require__(0);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _reactRouterDom = __webpack_require__(5);
+
+var _reactRedux = __webpack_require__(3);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+// Now Header component should be receiving a prop of auth
+var Header = function Header(_ref) {
+  var auth = _ref.auth;
+
+  // console.log('My auth status is', auth);
+
+  var authButton = auth ? _react2.default.createElement(
+    'a',
+    { href: '/api/logout' },
+    'Logout'
+  ) : _react2.default.createElement(
+    'a',
+    { href: '/api/auth/google' },
+    'Login'
+  );
+
+  return _react2.default.createElement(
+    'nav',
+    null,
+    _react2.default.createElement(
+      'div',
+      { className: 'nav-wrapper' },
+      _react2.default.createElement(
+        _reactRouterDom.Link,
+        { className: 'brand-logo', to: '/' },
+        'React SSR'
+      ),
+      _react2.default.createElement(
+        'ul',
+        { className: 'right' },
+        _react2.default.createElement(
+          'li',
+          null,
+          _react2.default.createElement(
+            _reactRouterDom.Link,
+            { to: '/users' },
+            'Users'
+          )
+        ),
+        _react2.default.createElement(
+          'li',
+          null,
+          _react2.default.createElement(
+            _reactRouterDom.Link,
+            { to: '/admins' },
+            'Admins'
+          )
+        ),
+        _react2.default.createElement(
+          'li',
+          null,
+          authButton
+        )
+      )
+    )
+  );
+};
+
+function mapStateToProps(_ref2) {
+  var auth = _ref2.auth;
+
+  return { auth: auth };
+}
+
+exports.default = (0, _reactRedux.connect)(mapStateToProps)(Header);
+
+/***/ }),
+/* 14 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _react = __webpack_require__(0);
+
+var _react2 = _interopRequireDefault(_react);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var Home = function Home() {
+  return _react2.default.createElement(
+    'div',
+    { className: 'center-align', style: { marginTop: '200px' } },
+    _react2.default.createElement(
+      'h3',
+      null,
+      'Welcome'
+    ),
+    _react2.default.createElement(
+      'p',
+      null,
+      'Check out these awesome features'
+    )
+  );
+}; // ES2015 Modules syntax or the `import .. export` syntax
+
+exports.default = {
+  component: Home
+};
+
+/* @ Normal React Application
+ * In a normal traditional React application, we would have a JavaScript file
+ * that gets loaded into the browser and that then gets executed. The JS file
+ * would render our JavaScript application, stick it into the DOM and then
+ * attach any related event handlers that we set up inside of the code base.
+ * So with the normal application, we ship down our entire JavaScript bundle
+ * file to the browser and that renders the app and sets up event handlers
+ * inside the browser.
+ *
+ * With this current setup, there's no JavaScript code being set down to the
+ * users browser right now.
+ * We make a request to the root route, the express server sends back the HTML
+ * from that Home component and absolutely nothing else. There's no JS code
+ * that is being loaded into the browser that sets up that event handler for us.
+ * We could check that on the network log in response.
+ * So in order to actually make sure that we get some JavaScript or have our
+ * application work correctly, we need to make sure that we somehow ship down
+ * all the JavaScript code related to our application after we ship down all
+ * this HTML that gets some initial content on the screen.
+ *
+ * So right now in the Server Side world, we are taking care of step number one.
+ * Step number one is getting HTML or getting content to show up on the screen.
+ * Step number two is, however, is to make sure that we then load up our
+ * React application and have the React application set up all the event handlers
+ * and action creators and data loading requests and all that kind of stuff that
+ * we normally want to have occur inside of our application.
+ *
+ * Solution to that Pain Point:
+ * Create two JavaScript bundles using Webpack. One bundle is going to contain
+ * all of our server side and client side code i.e our current setup
+ * webpack.server.js AND now we create another bundle for React app which will
+ * be shipped down to the users browser.
+ * The reason we want to have two bundles is our Server Side bundle and the
+ * Server Side code inside of it might contain sensitive information or sensitive
+ * code. For example, it might contain some secret API keys or special logic
+ * that could somehow be exploited. So there's going to be some amount of code on
+ * our server that we never want to ship down to the browser.
+ * So to implement this, we are going to set up a second Webpack pipeline that's
+ * going to run right along side our current one.
+ */
+
+/*
+import React from 'react';
+
+const Home = () => {
+  return (
+    <div style={{ color: 'dodgerblue' }}>
+      Home Component!!!
+      <button onClick={() => console.log('Hi there!')}>Press me!</button>
+    </div>
+  );
+};
+
+export default Home;
+*/
+
+/***/ }),
+/* 15 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = __webpack_require__(0);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _reactRedux = __webpack_require__(3);
+
+var _actions = __webpack_require__(1);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var UsersList = function (_Component) {
+  _inherits(UsersList, _Component);
+
+  function UsersList() {
+    _classCallCheck(this, UsersList);
+
+    return _possibleConstructorReturn(this, (UsersList.__proto__ || Object.getPrototypeOf(UsersList)).apply(this, arguments));
+  }
+
+  _createClass(UsersList, [{
+    key: 'componentDidMount',
+    value: function componentDidMount() {
+      this.props.fetchUsers();
+    }
+  }, {
+    key: 'renderUsers',
+    value: function renderUsers() {
+      return this.props.users.map(function (user) {
+        return _react2.default.createElement(
+          'li',
+          { key: user.id },
+          user.name
+        );
+      });
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      return _react2.default.createElement(
+        'div',
+        null,
+        'Big list of users:',
+        _react2.default.createElement(
+          'ul',
+          null,
+          this.renderUsers()
+        )
+      );
+    }
+  }]);
+
+  return UsersList;
+}(_react.Component);
+
+function mapStateToProps(state) {
+  return { users: state.users };
+}
+
+function loadData(store) {
+  // console.log('Trying to load some data...');
+  // We're going to do a manual dispatch here and we're going to call the
+  // fetchUsers action creator and pass the result into store.dispatch
+  // So now fetchUsers will be called. It will make a network request to the
+  // API and it's going to return a promise representing the network request
+  // to make sure that the promise is created, gets send back to our index.js
+  // file.
+  // So the thing that actually calls loadData, we're going to return the result
+  // of all of this stuff right here.
+  return store.dispatch((0, _actions.fetchUsers)());
+}
+
+// export { loadData };
+exports.default = {
+  // We will assign the load data fn to a key of load data
+  loadData: loadData,
+  // And then, The component that is produced by the connect fn right here
+  // will be assigned to a component key.
+  component: (0, _reactRedux.connect)(mapStateToProps, { fetchUsers: _actions.fetchUsers })(UsersList)
+};
+
+/***/ }),
+/* 16 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _react = __webpack_require__(0);
+
+var _react2 = _interopRequireDefault(_react);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var NotFoundPage = function NotFoundPage(_ref) {
+  var _ref$staticContext = _ref.staticContext,
+      staticContext = _ref$staticContext === undefined ? {} : _ref$staticContext;
+
+  staticContext.notFound = true;
+
+  return _react2.default.createElement(
+    'h1',
+    { style: { color: 'orangered' } },
+    'Oops, route not found.'
+  );
+};
+
+// Now this is a Page type component, so we're going to use that alternate
+// export syntax where we export default an object that has a key of component
+// and then a value od the component we just created!
+exports.default = {
+  component: NotFoundPage
+};
+
+/***/ }),
+/* 17 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _react = __webpack_require__(0);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _server = __webpack_require__(18);
+
+var _reactRouterDom = __webpack_require__(5);
+
+var _reactRedux = __webpack_require__(3);
+
+var _reactRouterConfig = __webpack_require__(2);
+
+var _serializeJavascript = __webpack_require__(19);
 
 var _serializeJavascript2 = _interopRequireDefault(_serializeJavascript);
 
-var _Routes = __webpack_require__(7);
+var _Routes = __webpack_require__(4);
 
 var _Routes2 = _interopRequireDefault(_Routes);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-exports.default = function (req, store) {
+/* @ StaticRouter Context
+ * Figure out when to make a response with 404 with StaticRouter
+ * */
+// This context prop right here in the StaticRouter and the object we pass into
+// it is what gives us the ability to communicate from our rendered components
+// back to this renderer file!
+// So the context object that we create and pass to the static router as a prop,
+// The StaticRouter takes that  context object and passes it as a prop down into
+// any component that it renders. So the context object ends up as a prop inside of
+// the not found page. So inside of the not found page component, we can receive
+// that context object as a prop and we will add an `error` property to that object.
+// Then after this StaticRouter finishes up all of its rendering stuff, we can
+// examine that context object and check to see if any of the components that it
+// was passed to marked it with an air. If it did, then we know that something
+// went wrong during the rendering process.
+// So in other words, pass in an empty object, mark it inside of some component
+// where we know that something went wrong! And if we're showing the not found
+// page, then clearly we know that something went wrong.
+// After StaticRouter runs, we inspect the context object and check to see if
+// something went wrong.
+//
+// Now the real changing part is, connecting the context object which communicates
+// some error message to the response object from Express, which is what we're
+// going to use to mark the response as being a 404.
+// So to connect these two parts together in `index.js`, we're going to define our
+// context object inside of * route handler and then we're going to pass it
+// into the `renderer` function there as a third argument.
+// And then we're going to receive that third argument of context and rather
+// than passing in an emtpy object for the context prop right here, we'll pass
+// in that context argument like so. i.e context={context}
+// So now the object that we're creating inside the `index.js` file is going to
+// be passed into the StaticRouter as a prop. Then the StaticRouter is going to
+// take that object context right here (i.e context={context}) and pass it down
+// to all of our rendered components!
+// So the next thing we're going to do is open up our NotFoundPage component and
+// accept this context thing as a prop.
+// There on that not found page, it's going to get passed as a prop called
+// `staticContext`. So internally, the StaticRouter renames that prop from
+// `context` to `staticContext`.
+// Now one thing, if we're rendering our application on the client side or on the
+// browser and we try to receive this `staticContext` thing, it won't exist in the
+// browser. Only the staticRouter implements this context thing. So if we try
+// to receive this as a prop on the browser, it won't exist because in the browser
+// we are rendering our application with a BrowserRouter!
+// We need to default the value of `staticContext` to be an empty object there
+// if it wasn't defined as a prop.
+
+exports.default = function (req, store, context) {
   var content = (0, _server.renderToString)(_react2.default.createElement(
     _reactRedux.Provider,
     { store: store },
     _react2.default.createElement(
       _reactRouterDom.StaticRouter,
-      { location: req.path, context: {} },
+      { location: req.path, context: context },
       _react2.default.createElement(
         'div',
         null,
@@ -874,19 +1541,19 @@ export default (req, store) => {
 // app and return it as a string
 
 /***/ }),
-/* 5 */
+/* 18 */
 /***/ (function(module, exports) {
 
 module.exports = require("react-dom/server");
 
 /***/ }),
-/* 6 */
+/* 19 */
 /***/ (function(module, exports) {
 
-module.exports = require("react-redux");
+module.exports = require("serialize-javascript");
 
 /***/ }),
-/* 7 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -896,89 +1563,17 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; // This is a file that's going to be shared between both the client and the
-// server side codebases.
+var _redux = __webpack_require__(7);
 
-/* @ Prevent naming collison for loadData fn for multiple pages */
-// Approach:
-// Rather than exporting the component and the load data function separately,
-// we're going to export one single object from each page component file.
-// And in that object we will wrap up both the component and the load data fn!
-// We'll then use our ES2015 spread syntax to dump both the component and the
-// load data definition into our route structure.
-
-/* import UsersListPage, { loadData } from './pages/UsersListPage'; */
-
-
-var _react = __webpack_require__(0);
-
-var _react2 = _interopRequireDefault(_react);
-
-var _App = __webpack_require__(23);
-
-var _App2 = _interopRequireDefault(_App);
-
-var _HomePage = __webpack_require__(19);
-
-var _HomePage2 = _interopRequireDefault(_HomePage);
-
-var _UsersListPage = __webpack_require__(20);
-
-var _UsersListPage2 = _interopRequireDefault(_UsersListPage);
-
-var _NotFoundPage = __webpack_require__(26);
-
-var _NotFoundPage2 = _interopRequireDefault(_NotFoundPage);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-// We always want this App component to be visible and we definitely want any
-// other component that is going to be shown inside of our application to be
-// rendered inside of the App.
-
-exports.default = [_extends({}, _App2.default, {
-  // We did not tie a path to this App component. That means it will always
-  // be displayed on the screen no matter what.
-
-  // Last thing we have to do is, to make sure whenever we match one of these
-  // child routes, they end up getting rendered by the App. So the App component
-  // right there (i.e ...App), is going to be passed the child component
-  // as a property and it's going to be up to the App component to figure out
-  // that it needs to actually render whatever routes got matched as children.
-  routes: [_extends({}, _HomePage2.default, {
-    path: '/',
-    // component: HomePage,
-    exact: true
-  }), _extends({}, _UsersListPage2.default, {
-    // loadData,
-    path: '/users'
-    // component: UsersListPage,
-  }), _extends({}, _NotFoundPage2.default)]
-})];
-
-/***/ }),
-/* 8 */,
-/* 9 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _redux = __webpack_require__(10);
-
-var _reduxThunk = __webpack_require__(11);
+var _reduxThunk = __webpack_require__(21);
 
 var _reduxThunk2 = _interopRequireDefault(_reduxThunk);
 
-var _axios = __webpack_require__(15);
+var _axios = __webpack_require__(6);
 
 var _axios2 = _interopRequireDefault(_axios);
 
-var _reducers = __webpack_require__(12);
+var _reducers = __webpack_require__(22);
 
 var _reducers2 = _interopRequireDefault(_reducers);
 
@@ -1107,19 +1702,13 @@ export default () => {
 */
 
 /***/ }),
-/* 10 */
-/***/ (function(module, exports) {
-
-module.exports = require("redux");
-
-/***/ }),
-/* 11 */
+/* 21 */
 /***/ (function(module, exports) {
 
 module.exports = require("redux-thunk");
 
 /***/ }),
-/* 12 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1129,13 +1718,13 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _redux = __webpack_require__(10);
+var _redux = __webpack_require__(7);
 
-var _usersReducer = __webpack_require__(13);
+var _usersReducer = __webpack_require__(23);
 
 var _usersReducer2 = _interopRequireDefault(_usersReducer);
 
-var _authReducer = __webpack_require__(25);
+var _authReducer = __webpack_require__(24);
 
 var _authReducer2 = _interopRequireDefault(_authReducer);
 
@@ -1147,7 +1736,7 @@ exports.default = (0, _redux.combineReducers)({
 });
 
 /***/ }),
-/* 13 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1157,7 +1746,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _actions = __webpack_require__(14);
+var _actions = __webpack_require__(1);
 
 exports.default = function () {
   var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
@@ -1172,503 +1761,7 @@ exports.default = function () {
 };
 
 /***/ }),
-/* 14 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.fetchCurrentUser = exports.FETCH_CURRENT_USER = exports.fetchUsers = exports.FETCH_USERS = undefined;
-
-var _axios = __webpack_require__(15);
-
-var _axios2 = _interopRequireDefault(_axios);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
-
-// Fetch list of users
-var FETCH_USERS = exports.FETCH_USERS = 'fetch_users';
-
-// This fn gets automatically invoked by Redux Thunk. When Redux Thunk calls this
-// function, it's now going to pass in three separate arguments. The first argument
-// will be the dispatch function, the second argument will be the getState fn and
-// the third is going to be this new little Axios instance that we passed in as
-// third extra argument in client.js
-// Now rathre than refer to it as `axiosInstance` here, which isn't like super
-// clear what that really means, we're renaming this argument to simply be just
-// `api` so that it'll be really clear that we can use this argument right here
-// to get access to our API!
-// So now whenever we make a request inside of our action creator, rather than
-// using the base Axios library, we're going to use this customized Axios instance
-// called api.
-
-// So now as long as we make all of our request from our action creator file
-// i.e actions/index.js, as long as we make all of our requests that are
-// expected to go to our API with this `api` argument right here, no matter
-// whether we are on the client or the server, it will always somehow end up
-// making the request to the actual API hosted at Heroku app.
-//
-// NOTE: If we ever end up wanting to make a request to some target that is not
-// our API, we do have to import axios and use essentially a non configured
-// version of Axios.
-// i.e import axios from 'axios';
-// So we would not want to try to use this `api` object here we're receiving.
-// If we wanted to make a request to like some like Instagram API or something
-// like that or Snapchat API.
-// So this copy of Axios right here, this `api` instance is only for use with
-// our API. If we want to access anything else, we use the original axios library!
-var fetchUsers = exports.fetchUsers = function fetchUsers() {
-  return function () {
-    var _ref = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee(dispatch, getState, api) {
-      var res;
-      return regeneratorRuntime.wrap(function _callee$(_context) {
-        while (1) {
-          switch (_context.prev = _context.next) {
-            case 0:
-              _context.next = 2;
-              return api.get('/users');
-
-            case 2:
-              res = _context.sent;
-
-
-              dispatch({
-                type: FETCH_USERS,
-                payload: res
-              });
-
-            case 4:
-            case 'end':
-              return _context.stop();
-          }
-        }
-      }, _callee, undefined);
-    }));
-
-    return function (_x, _x2, _x3) {
-      return _ref.apply(this, arguments);
-    };
-  }();
-};
-
-// Action creator to fetch the current authentication status.
-var FETCH_CURRENT_USER = exports.FETCH_CURRENT_USER = 'fetch_current_user';
-
-var fetchCurrentUser = exports.fetchCurrentUser = function fetchCurrentUser() {
-  return function () {
-    var _ref2 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2(dispatch, getState, api) {
-      var res;
-      return regeneratorRuntime.wrap(function _callee2$(_context2) {
-        while (1) {
-          switch (_context2.prev = _context2.next) {
-            case 0:
-              _context2.next = 2;
-              return api.get('/current_user');
-
-            case 2:
-              res = _context2.sent;
-
-
-              dispatch({
-                type: FETCH_CURRENT_USER,
-                payload: res
-              });
-
-            case 4:
-            case 'end':
-              return _context2.stop();
-          }
-        }
-      }, _callee2, undefined);
-    }));
-
-    return function (_x4, _x5, _x6) {
-      return _ref2.apply(this, arguments);
-    };
-  }();
-};
-
-/***/ }),
-/* 15 */
-/***/ (function(module, exports) {
-
-module.exports = require("axios");
-
-/***/ }),
-/* 16 */,
-/* 17 */
-/***/ (function(module, exports) {
-
-module.exports = require("babel-polyfill");
-
-/***/ }),
-/* 18 */
-/***/ (function(module, exports) {
-
-module.exports = require("react-router-config");
-
-/***/ }),
-/* 19 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _react = __webpack_require__(0);
-
-var _react2 = _interopRequireDefault(_react);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var Home = function Home() {
-  return _react2.default.createElement(
-    'div',
-    { className: 'center-align', style: { marginTop: '200px' } },
-    _react2.default.createElement(
-      'h3',
-      null,
-      'Welcome'
-    ),
-    _react2.default.createElement(
-      'p',
-      null,
-      'Check out these awesome features'
-    )
-  );
-}; // ES2015 Modules syntax or the `import .. export` syntax
-
-exports.default = {
-  component: Home
-};
-
-/* @ Normal React Application
- * In a normal traditional React application, we would have a JavaScript file
- * that gets loaded into the browser and that then gets executed. The JS file
- * would render our JavaScript application, stick it into the DOM and then
- * attach any related event handlers that we set up inside of the code base.
- * So with the normal application, we ship down our entire JavaScript bundle
- * file to the browser and that renders the app and sets up event handlers
- * inside the browser.
- *
- * With this current setup, there's no JavaScript code being set down to the
- * users browser right now.
- * We make a request to the root route, the express server sends back the HTML
- * from that Home component and absolutely nothing else. There's no JS code
- * that is being loaded into the browser that sets up that event handler for us.
- * We could check that on the network log in response.
- * So in order to actually make sure that we get some JavaScript or have our
- * application work correctly, we need to make sure that we somehow ship down
- * all the JavaScript code related to our application after we ship down all
- * this HTML that gets some initial content on the screen.
- *
- * So right now in the Server Side world, we are taking care of step number one.
- * Step number one is getting HTML or getting content to show up on the screen.
- * Step number two is, however, is to make sure that we then load up our
- * React application and have the React application set up all the event handlers
- * and action creators and data loading requests and all that kind of stuff that
- * we normally want to have occur inside of our application.
- *
- * Solution to that Pain Point:
- * Create two JavaScript bundles using Webpack. One bundle is going to contain
- * all of our server side and client side code i.e our current setup
- * webpack.server.js AND now we create another bundle for React app which will
- * be shipped down to the users browser.
- * The reason we want to have two bundles is our Server Side bundle and the
- * Server Side code inside of it might contain sensitive information or sensitive
- * code. For example, it might contain some secret API keys or special logic
- * that could somehow be exploited. So there's going to be some amount of code on
- * our server that we never want to ship down to the browser.
- * So to implement this, we are going to set up a second Webpack pipeline that's
- * going to run right along side our current one.
- */
-
-/*
-import React from 'react';
-
-const Home = () => {
-  return (
-    <div style={{ color: 'dodgerblue' }}>
-      Home Component!!!
-      <button onClick={() => console.log('Hi there!')}>Press me!</button>
-    </div>
-  );
-};
-
-export default Home;
-*/
-
-/***/ }),
-/* 20 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _react = __webpack_require__(0);
-
-var _react2 = _interopRequireDefault(_react);
-
-var _reactRedux = __webpack_require__(6);
-
-var _actions = __webpack_require__(14);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var UsersList = function (_Component) {
-  _inherits(UsersList, _Component);
-
-  function UsersList() {
-    _classCallCheck(this, UsersList);
-
-    return _possibleConstructorReturn(this, (UsersList.__proto__ || Object.getPrototypeOf(UsersList)).apply(this, arguments));
-  }
-
-  _createClass(UsersList, [{
-    key: 'componentDidMount',
-    value: function componentDidMount() {
-      this.props.fetchUsers();
-    }
-  }, {
-    key: 'renderUsers',
-    value: function renderUsers() {
-      return this.props.users.map(function (user) {
-        return _react2.default.createElement(
-          'li',
-          { key: user.id },
-          user.name
-        );
-      });
-    }
-  }, {
-    key: 'render',
-    value: function render() {
-      return _react2.default.createElement(
-        'div',
-        null,
-        'Big list of users:',
-        _react2.default.createElement(
-          'ul',
-          null,
-          this.renderUsers()
-        )
-      );
-    }
-  }]);
-
-  return UsersList;
-}(_react.Component);
-
-function mapStateToProps(state) {
-  return { users: state.users };
-}
-
-function loadData(store) {
-  // console.log('Trying to load some data...');
-  // We're going to do a manual dispatch here and we're going to call the
-  // fetchUsers action creator and pass the result into store.dispatch
-  // So now fetchUsers will be called. It will make a network request to the
-  // API and it's going to return a promise representing the network request
-  // to make sure that the promise is created, gets send back to our index.js
-  // file.
-  // So the thing that actually calls loadData, we're going to return the result
-  // of all of this stuff right here.
-  return store.dispatch((0, _actions.fetchUsers)());
-}
-
-// export { loadData };
-exports.default = {
-  // We will assign the load data fn to a key of load data
-  loadData: loadData,
-  // And then, The component that is produced by the connect fn right here
-  // will be assigned to a component key.
-  component: (0, _reactRedux.connect)(mapStateToProps, { fetchUsers: _actions.fetchUsers })(UsersList)
-};
-
-/***/ }),
-/* 21 */
-/***/ (function(module, exports) {
-
-module.exports = require("serialize-javascript");
-
-/***/ }),
-/* 22 */
-/***/ (function(module, exports) {
-
-module.exports = require("express-http-proxy");
-
-/***/ }),
-/* 23 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _react = __webpack_require__(0);
-
-var _react2 = _interopRequireDefault(_react);
-
-var _reactRouterConfig = __webpack_require__(18);
-
-var _Header = __webpack_require__(24);
-
-var _Header2 = _interopRequireDefault(_Header);
-
-var _actions = __webpack_require__(14);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-// We're going to call renderRoutes as a function and then into it, we're going
-// to pass in any routes that get mactched during the match routes process, will
-// be passed into the app component as a prop called `route`.
-// So this route right here contains a property on it called `routes` and that is
-// the collection of components that we need to render inside of the App.
-// So now any child routes that are matched will be automatically turned into
-// route components by this renderRoutes function call and basically everything
-// shows up!
-/* @ Root Component */
-
-var App = function App(_ref) {
-  var route = _ref.route;
-
-  return _react2.default.createElement(
-    'div',
-    null,
-    _react2.default.createElement(_Header2.default, null),
-    (0, _reactRouterConfig.renderRoutes)(route.routes)
-  );
-};
-
-// Now even though this is not strictly a page component per se, we're going to
-// have it follow the same convention for exports as our page components because
-// we might want to eventually tie some data loading to this App component.
-// We would want to tie some data loading to this thing if there was some type
-// of action creator or some type of request that we wanted to execute for
-// every single page inside of our application, and we might eventually want to
-// do that. So we're going to export this thing as though it were a page.
-// Now we'll be able to use this thing with same spread syntax inside of our
-// routes file!
-exports.default = {
-  component: App,
-  loadData: function loadData(_ref2) {
-    var dispatch = _ref2.dispatch;
-    return dispatch((0, _actions.fetchCurrentUser)());
-  }
-};
-
-/***/ }),
 /* 24 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _react = __webpack_require__(0);
-
-var _react2 = _interopRequireDefault(_react);
-
-var _reactRouterDom = __webpack_require__(1);
-
-var _reactRedux = __webpack_require__(6);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-// Now Header component should be receiving a prop of auth
-var Header = function Header(_ref) {
-  var auth = _ref.auth;
-
-  // console.log('My auth status is', auth);
-
-  var authButton = auth ? _react2.default.createElement(
-    'a',
-    { href: '/api/logout' },
-    'Logout'
-  ) : _react2.default.createElement(
-    'a',
-    { href: '/api/auth/google' },
-    'Login'
-  );
-
-  return _react2.default.createElement(
-    'nav',
-    null,
-    _react2.default.createElement(
-      'div',
-      { className: 'nav-wrapper' },
-      _react2.default.createElement(
-        _reactRouterDom.Link,
-        { className: 'brand-logo', to: '/' },
-        'React SSR'
-      ),
-      _react2.default.createElement(
-        'ul',
-        { className: 'right' },
-        _react2.default.createElement(
-          'li',
-          null,
-          _react2.default.createElement(
-            _reactRouterDom.Link,
-            { to: '/users' },
-            'Users'
-          )
-        ),
-        _react2.default.createElement(
-          'li',
-          null,
-          _react2.default.createElement(
-            _reactRouterDom.Link,
-            { to: '/admins' },
-            'Admins'
-          )
-        ),
-        _react2.default.createElement(
-          'li',
-          null,
-          authButton
-        )
-      )
-    )
-  );
-};
-
-function mapStateToProps(_ref2) {
-  var auth = _ref2.auth;
-
-  return { auth: auth };
-}
-
-exports.default = (0, _reactRedux.connect)(mapStateToProps)(Header);
-
-/***/ }),
-/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1690,39 +1783,7 @@ exports.default = function () {
   }
 };
 
-var _actions = __webpack_require__(14);
-
-/***/ }),
-/* 26 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _react = __webpack_require__(0);
-
-var _react2 = _interopRequireDefault(_react);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var NotFoundPage = function NotFoundPage() {
-  return _react2.default.createElement(
-    'h1',
-    { style: { color: 'orangered' } },
-    'Oops, route not found.'
-  );
-};
-
-// Now this is a Page type component, so we're going to use that alternate
-// export syntax where we export default an object that has a key of component
-// and then a value od the component we just created!
-exports.default = {
-  component: NotFoundPage
-};
+var _actions = __webpack_require__(1);
 
 /***/ })
 /******/ ]);

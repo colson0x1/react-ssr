@@ -11,10 +11,57 @@ import { renderRoutes } from 'react-router-config';
 import serialize from 'serialize-javascript';
 import Routes from '../client/Routes';
 
-export default (req, store) => {
+/* @ StaticRouter Context
+ * Figure out when to make a response with 404 with StaticRouter
+ * */
+// This context prop right here in the StaticRouter and the object we pass into
+// it is what gives us the ability to communicate from our rendered components
+// back to this renderer file!
+// So the context object that we create and pass to the static router as a prop,
+// The StaticRouter takes that  context object and passes it as a prop down into
+// any component that it renders. So the context object ends up as a prop inside of
+// the not found page. So inside of the not found page component, we can receive
+// that context object as a prop and we will add an `error` property to that object.
+// Then after this StaticRouter finishes up all of its rendering stuff, we can
+// examine that context object and check to see if any of the components that it
+// was passed to marked it with an air. If it did, then we know that something
+// went wrong during the rendering process.
+// So in other words, pass in an empty object, mark it inside of some component
+// where we know that something went wrong! And if we're showing the not found
+// page, then clearly we know that something went wrong.
+// After StaticRouter runs, we inspect the context object and check to see if
+// something went wrong.
+//
+// Now the real changing part is, connecting the context object which communicates
+// some error message to the response object from Express, which is what we're
+// going to use to mark the response as being a 404.
+// So to connect these two parts together in `index.js`, we're going to define our
+// context object inside of * route handler and then we're going to pass it
+// into the `renderer` function there as a third argument.
+// And then we're going to receive that third argument of context and rather
+// than passing in an emtpy object for the context prop right here, we'll pass
+// in that context argument like so. i.e context={context}
+// So now the object that we're creating inside the `index.js` file is going to
+// be passed into the StaticRouter as a prop. Then the StaticRouter is going to
+// take that object context right here (i.e context={context}) and pass it down
+// to all of our rendered components!
+// So the next thing we're going to do is open up our NotFoundPage component and
+// accept this context thing as a prop.
+// There on that not found page, it's going to get passed as a prop called
+// `staticContext`. So internally, the StaticRouter renames that prop from
+// `context` to `staticContext`.
+// Now one thing, if we're rendering our application on the client side or on the
+// browser and we try to receive this `staticContext` thing, it won't exist in the
+// browser. Only the staticRouter implements this context thing. So if we try
+// to receive this as a prop on the browser, it won't exist because in the browser
+// we are rendering our application with a BrowserRouter!
+// We need to default the value of `staticContext` to be an empty object there
+// if it wasn't defined as a prop.
+
+export default (req, store, context) => {
   const content = renderToString(
     <Provider store={store}>
-      <StaticRouter location={req.path} context={{}}>
+      <StaticRouter location={req.path} context={context}>
         <div>{renderRoutes(Routes)}</div>
       </StaticRouter>
     </Provider>,
