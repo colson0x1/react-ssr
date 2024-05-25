@@ -90,93 +90,134 @@ app.get('*', (req, res) => {
   // So this entire statement right here will return an array of promises
   // representing all the pending network requests from all the action
   // creators that we might end up calling.
-  const promises = matchRoutes(Routes, req.path).map(({ route }) => {
-    // Now all of our loadData functions will have a reference to our server
-    // side redux store
-    return route.loadData ? route.loadData(store) : null;
-  });
+  const promises = matchRoutes(Routes, req.path)
+    .map(({ route }) => {
+      // Now all of our loadData functions will have a reference to our server
+      // side redux store
+      return route.loadData ? route.loadData(store) : null;
+    })
+    .map((promise) => {
+      if (promise) {
+        return new Promise((resolve, reject) => {
+          promise.then(resolve).catch(resolve);
+        });
+      }
+    });
 
-  /* @ Approach II */
-  // I don't recommend this second solution to use in our own application too.
-  // So the second solution really revolves around the fact that the big
-  // error right now is the Promise.all statement.
-  // So if anything goes wrong during this initial data loading request, we
-  // never execute the .then() function. So nothing here inside .then gets
-  // executed. So this second solution that I'm going to suggest here would
-  // be to say that, hey you know what? Even if something goes wrong during
-  // this initial data loading process right here, even if something goes poorly,
-  // let's still attempt to render the application. So even if something goes
-  // wrong, still attempt to render the application and send content back to the
-  // user.
-  // So for this solution, we're going to say that no matter what happens here,
-  // we're still going to run this .then() function. We're going to take this
-  // arrow function that we're passing to .then(), we're gonna cut the entire
-  // thing out and then we're going to assign it to a variable right above.
-  // Here we are calling it render. Then. with the Promise.all statement, we're
-  // going to say if everything goes correctly with waiting for these request,
-  // then run the render function (i.e .then()) and if anything goes poorly,
-  // still run the render function (i.e .catch())
+  /* @ Approach 3rd */
+  // In Approach 2nd, we attempted to write some code that would render our
+  // application even if something went wrong with one of our initial API
+  // requests.
+  // Now the downside to that approach as I explained was that we very quickly
+  // realized that because Promise.all will fail early, if any of our requests
+  // fail, the page will attempt to be rendered before all the other requests
+  // are completed.
+  // Now for our application, that's not quite such a big deal. But as soon as
+  // we start adding in more requests, we would begin to see some of our requests
+  // not be completed before we attempt to render the page. If any of our
+  // requests started to air out.
+  // Now we're going to code a similar solution that kind of gets around this
+  // little limitation of the Promise.all function.
   //
-  // We're now saying that no matter what, we are going to always attempt to
-  // render our application and send a response back to the user.
-  // Back in the application, if we check the root route: localhost:300 and
-  // still being not authenticated, when we try to visit admin page. We get the
-  // text, Protected list of admins with Header.
-  // We don't see any list of admins there, but you know what? We at least
-  // showed some content to the user.
-  // So in this case, yes, things might be a little bit confusing. The user might
-  // be thinking where's my list of admins? And we are not very correctly or
-  // we're not really appropriately presenting any error message or anything
-  // to the user that says, Hey, here's why things are going wrong.
-  // But you know what? At least we have content showing up. At least we're
-  // not just showing some plain text that says, Hey, something went wrong.
-  // So I would say that this solution right here is at least better than the
-  // one we were just looking with approach I.
+  // So here's what we're gonna do!
+  // The entire weakness of Promise.all is that it will immediately go to its
+  // catch statement or it will immediately reject itself if any of the promises
+  // that is passed are rejected. So what we're going to do is take all of those
+  // promises that we collected from our load data function and we're going to
+  // wrap them inside of a new promise.
+  // So each and every action creator that generates a promise, each and every
+  // single load data function that generates a promise, we're going to take
+  // those and wrap them inside of a new promise.
+  // So let's think there are 3 promise box inside Promise.all rectangle.
+  // We're goint to take each of those promises (i.e each of the promis box),
+  // and we're going to wrap them with a new promise. Each one gets its own
+  // new promise and that is represented with the another 3 box that covers
+  // each promises boxes.
+  // Now those outer promises are going to watch the inner promise box!
+  // Whenever the inner promise box is resolved or rejected, we will manually
+  // resolve the outer promise box.
+  // So the entire idea here is that we are just going to try to circumvent
+  // this issues with Promise.all, where it will immediately short circuit as
+  // soon as a promise that it passed rejects.
+  // So we're still going to use Promise.all. We're still going to attempt to
+  // render the page no matter what. But now, we are going to make sure that
+  // every single request is given the opportunity to complete before we attempt
+  // to render the page!
+  // And we're gonna do that by wrapping all of our promises that come from the
+  // load data functions with an outer promise that will always be resolved
+  // whenever the inner one is resolved or rejected.
   //
-  // However, there's still a really big hole with this solution, a really big
-  // problem.
-  // So if we really understand how Promise.all works, we're going to very
-  // quickly realize why this always attempt to render something.
-  // So the solution right here is really not going to be a good approach.
-  // So the key thing to remember is that as soon as Promise.all sees that
-  // one of the promises that we have passed to it has been rejected, the entire
-  // Promise.all statement fails and it instantly calls the .catch() function.
-  // So what's that really mean?
-  // Well, it means that if we have say three requests in the Promise.all,
-  // if we pass three promises to Promise.all and one succeeds and another fails,
-  // everything instantly goes to the catch function even if this third
-  // promise say was going to be successfully resolved.
-  // So in other words, we might be attempting to render our page before every
-  // request has been resolved or rejected, one or the other.
-  // In other words, we are rendering the application too early.
-  // So this is going to be a big issue if we are starting to access pages inside
-  // of our application that make a lot of data fetching requests. You know, let's
-  // say that we are attempting to make five requests to load a given page. If
-  // the very first request that gets responded to by our API results in an
-  // error, that means that the other four requests would not be allowed to
-  // finish and we would instantly attempt to render the page without getting
-  // any data back on those other four requests.
-  // So even though, yeah, we're at least showing some content here, it's still
-  // not the best approach in the world because ideally we would say, okay,
-  // you know, we understand that maybe this request right here failed, but
-  // let's at least wait for the other unresolved ones to finish before we go
-  // and attempt to render our application. So in other words, the issue with
-  // this approach right now is that we are attempting to just render the
-  // application too soon. We're not allowing other requests to be completed.
-  // We can easily imagine that if we were making maney requests, its very
-  // possible that the very first request that fails, everything else gets
-  // ignored and we instantly render the page and send the result back to the
-  // user. Ideally, we would wait for as many requests to be completed, either
-  // with success or error, so we would wait for those to be completed before
-  // attempting to render the page.
+  // So the line of code where we call all of our load data functions,
+  // i.e const promises = matchRoutes()
+  // And with each of these load data functions we call the load data and we
+  // return the result of that. `route.loadData(store)` would be a promise right
+  // there.
+  // So essentially, we want to wrap this value right there (i.e route.loadData(store))
+  // with a new promise. The new promise is going to watch this value.
+  // Whenever that value is resolved or rejected, we will automatically resolve
+  // the outer promise. So as far as Promise.all is concerned, it's going to think
+  // that every single promise that is passed is always going to be successfully
+  // resolved 100% of the time. But we know that, that's not entirely true.
+  // So we're going to write the code that's going to create the new promise,
+  // watch the inner promise, and then always resolve no matter what.
+  // `matchRoutes()` right there is going to return an array of promises or the
+  // value null. So we always have to keep in mind that some of the pages that
+  // we render might not have a load data function.
+  // So promises right there (i.e const promises = ..), may either be an array
+  // of promises, but some of the values in there might possibly be null.
+  // So we just got to keep that in mind as we write the code.
+  // So we're going to chain on a second map statement there. So we're going
+  // to iterate over the list of promises that is generated by this first
+  // map right there. We're going to iterate over it. We're going to make our
+  // new promises and we're going to always resolve them. So we're going to
+  // add on a second map statement.
+  // We absolutely create a new promise right there (i.e route.loadData(store)),
+  // we could totally do that right inline but I think that would kind of
+  // complicate the logic here. And it would be a little bit ugly.
+  // So we're going to do the mapping step in just a second map function.
+  // So we're going to map over this list of promises and null values. And for
+  // every promise inside there, we are going to check to see if it is a promise.
+  // So the if statement right there above is going to handle the case in which
+  // we have some null values. So yes, if we have a promise here, then we will
+  // return a new Promise.
+  // Whenever we create a new Promise, we have to pass in a function that gets
+  // called the instant this new Promise is created, the inner function gets
+  // called with two functions of its own that we refer to as resolve and reject.
+  // So then inside of that new Promise, we are going to look at the original
+  // promise and we're going to say whenever this original promise (i.e if (promise) {}),
+  // is resolve or rejected, we will instantly resolve thew new one that we
+  // just created. (i.e return new Promise((resolve, reject) => {}))
+  // Inside of it, we'll say promise.then(), then we'll pass in `resolve`,
+  // we'll say .catch() and we'll pass in `resolve` there as well.
+  // So no matter what, we're always going to resolve the inner promise, no matter
+  // what. i.e promise.then(resolve).catch(resolve)
   //
-  // So that's what really leads us into our third solution, the solution where
-  // we are still going to still pass all these requests to Promise.all, but
-  // this time around we're going to figure out a way to let every request to
-  // be either resolved or rejected before attempting to render the page!
+  // So to summarize, we're just going to map the array of promises and null
+  // values that were created. If it is a promise, we'll wrap it with a new
+  // promise (i.e return new Promise((resolve, reject) => {})) and always
+  // resolve it. And we pass that of to Promise.all
+  // (i.e return new Promise((resolve, reject) => {})) to here below to
+  // Promise.all(promises).then(() => { ... })
+  // Now if we go to localhost:3000/admins and disable JavaScript, we're
+  // still showing the protected or essentially we should say, we're still
+  // showing our application. We're not actually showing any content there.
+  // Since the output below Header navbar there is: 'Protected list of admins'.
+  // So the user is probably going to still be thinking what's going on there,
+  // where is my list of admins?
+  // But at least, we are actually shhowing the content of the page and we
+  // are showing the content of the page after all of our requests were
+  // completed!!! Not as soon as one failed like with approach 2.
+  // We are going to wait for every request on this approach, to be completed,
+  // even if one of those failed. And then when everything is complete, we'll
+  // then render our application and send it down to the user!!!!
   //
+  // So we are able to get some content on the screen if one of our requests
+  // go wrong. But that's really only half of the equation. Like we are able to
+  // get some content on the screen, but still we kind of want to make sure
+  // that the user understands why we are not showing a list of admins to them.
+  // Like why is that list blank right there on the browser.
 
-  const render = () => {
+  Promise.all(promises).then(() => {
     const context = {};
 
     // Right here is when it is actually a very good time to actually render
@@ -194,9 +235,7 @@ app.get('*', (req, res) => {
     }
 
     res.send(content);
-  };
-
-  Promise.all(promises).then(render).catch(render);
+  });
 
   console.log(promises);
 });
@@ -518,4 +557,106 @@ Promise.all(promises)
   .catch(() => {
     res.send('Something went wrong');
   });
+*/
+
+/* @ Approach II */
+// I don't recommend this second solution to use in our own application too.
+// So the second solution really revolves around the fact that the big
+// error right now is the Promise.all statement.
+// So if anything goes wrong during this initial data loading request, we
+// never execute the .then() function. So nothing here inside .then gets
+// executed. So this second solution that I'm going to suggest here would
+// be to say that, hey you know what? Even if something goes wrong during
+// this initial data loading process right here, even if something goes poorly,
+// let's still attempt to render the application. So even if something goes
+// wrong, still attempt to render the application and send content back to the
+// user.
+// So for this solution, we're going to say that no matter what happens here,
+// we're still going to run this .then() function. We're going to take this
+// arrow function that we're passing to .then(), we're gonna cut the entire
+// thing out and then we're going to assign it to a variable right above.
+// Here we are calling it render. Then. with the Promise.all statement, we're
+// going to say if everything goes correctly with waiting for these request,
+// then run the render function (i.e .then()) and if anything goes poorly,
+// still run the render function (i.e .catch())
+//
+// We're now saying that no matter what, we are going to always attempt to
+// render our application and send a response back to the user.
+// Back in the application, if we check the root route: localhost:300 and
+// still being not authenticated, when we try to visit admin page. We get the
+// text, Protected list of admins with Header.
+// We don't see any list of admins there, but you know what? We at least
+// showed some content to the user.
+// So in this case, yes, things might be a little bit confusing. The user might
+// be thinking where's my list of admins? And we are not very correctly or
+// we're not really appropriately presenting any error message or anything
+// to the user that says, Hey, here's why things are going wrong.
+// But you know what? At least we have content showing up. At least we're
+// not just showing some plain text that says, Hey, something went wrong.
+// So I would say that this solution right here is at least better than the
+// one we were just looking with approach I.
+//
+// However, there's still a really big hole with this solution, a really big
+// problem.
+// So if we really understand how Promise.all works, we're going to very
+// quickly realize why this always attempt to render something.
+// So the solution right here is really not going to be a good approach.
+// So the key thing to remember is that as soon as Promise.all sees that
+// one of the promises that we have passed to it has been rejected, the entire
+// Promise.all statement fails and it instantly calls the .catch() function.
+// So what's that really mean?
+// Well, it means that if we have say three requests in the Promise.all,
+// if we pass three promises to Promise.all and one succeeds and another fails,
+// everything instantly goes to the catch function even if this third
+// promise say was going to be successfully resolved.
+// So in other words, we might be attempting to render our page before every
+// request has been resolved or rejected, one or the other.
+// In other words, we are rendering the application too early.
+// So this is going to be a big issue if we are starting to access pages inside
+// of our application that make a lot of data fetching requests. You know, let's
+// say that we are attempting to make five requests to load a given page. If
+// the very first request that gets responded to by our API results in an
+// error, that means that the other four requests would not be allowed to
+// finish and we would instantly attempt to render the page without getting
+// any data back on those other four requests.
+// So even though, yeah, we're at least showing some content here, it's still
+// not the best approach in the world because ideally we would say, okay,
+// you know, we understand that maybe this request right here failed, but
+// let's at least wait for the other unresolved ones to finish before we go
+// and attempt to render our application. So in other words, the issue with
+// this approach right now is that we are attempting to just render the
+// application too soon. We're not allowing other requests to be completed.
+// We can easily imagine that if we were making maney requests, its very
+// possible that the very first request that fails, everything else gets
+// ignored and we instantly render the page and send the result back to the
+// user. Ideally, we would wait for as many requests to be completed, either
+// with success or error, so we would wait for those to be completed before
+// attempting to render the page.
+//
+// So that's what really leads us into our third solution, the solution where
+// we are still going to still pass all these requests to Promise.all, but
+// this time around we're going to figure out a way to let every request to
+// be either resolved or rejected before attempting to render the page!
+/*
+  const render = () => {
+    const context = {};
+
+    // Right here is when it is actually a very good time to actually render
+    // our application.
+    // So now after all of our data loading functions have finished, we will
+    // render the application and hopefully get all of our content to show up
+    // on the screen as HTML.
+    // res.send(renderer(req, store, context));
+
+    const content = renderer(req, store, context);
+
+    // Its totally okay to call the status before we send the response back
+    if (context.notFound) {
+      res.status(404);
+    }
+
+    res.send(content);
+  };
+
+  Promise.all(promises).then(render).catch(render);
 */
