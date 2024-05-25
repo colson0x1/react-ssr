@@ -767,6 +767,82 @@ if ('we are running on server') {
 }
 */
 
+/* @ Axios Instances with Redux Thunk
+ * We need to somehow customize the configuratoin of Axios depending on whether
+ * we are running it on the client or the server.
+ * We dont't really want to put that customization into every single action
+ * creator.
+ * So for that, we're going to use a very little documented feature of Axios
+ * and Redux thunk to solve this in a much more concise fashion!
+ *
+ * Creating an axios instance from the official documentation:
+ * ```js
+ * var instance = axios.create({
+ *    baseURL: 'https://some-domain.com/api/',
+ *    timeout: 1000,
+ *    headers: {'X-Custom-Header': 'foobar'}
+ * })
+ * ```
+ *
+ * We might want to make some base URL one for the server and then one for the
+ * client.
+ * On the official source code of Redux Thunk in src/index.js, there's an
+ * extra function attached to the exported thunk called withExtraArgument.
+ *
+ * i.e
+ * ```js
+ * functoin createThunkMiddleware(extraArgument) {
+ *    return ({ dispatch, getState}) => next => action => {
+ *      if (typeof action === 'function') {
+ *        return action(dispatch, getState, extraArgument);
+ *      }
+ *
+ *      return next(action);
+ *    }
+ * }
+ *
+ * const thunk = createThunkMiddleware();
+ * thunk.withExtraArgument - createThunkMiddleware;
+ *
+ * export default thunk;
+ * ```
+ *
+ * So with this extra argument thing right here is essentially a function
+ * that allows us to create kind of a custom copy of Redux Thunk that takes
+ * some extra argument. And then whenever Redux Thunk calls one of our function
+ * action creators, like the function that we return from a Redux thunkified
+ * action creatorm it will not only pass in the dispatch function, it will not
+ * only pass in the getState function, which is a reference to our Redux Store's
+ * getState function, but it will also pass in third arguemnt this extraArgument
+ * thing.
+ *
+ * So putting together, with Axios we can create a custom configuration here and
+ * with Redux Thunk we can somehow kind of like inject a custom extra third
+ * argument (extraArgument) to our action creators!!
+ *
+ * So now on both the client and the server, we're going to use these two
+ * features together to easily address the fact that we want to have a custom
+ * Axios instance on the client and a custom Axios instance on the server.
+ * i.e In our application right now, we've two different copies of Redux store
+ * floating around. We've got the one on the client and one on the server.
+ * We're going to make sure that when we create each of these copies, we also
+ * create a custom instance of Axios and pass that custom instnace into Redux
+ * Thunk as an extra third argument. Then in our actoin creators, whenever we
+ * try to make some type of network request, we will receive that customized
+ * copy of Axios rather than import the axios module itself.
+ * We can then freely make requests in our action creator without having to
+ * actually worry about whether we are on the client or the server.
+ *
+ * So in othe rwords, we're doing this early customization of Axios slightly
+ * different on the client, slightly different on the server.
+ * We then pass that as the third argument or as an argument to Redux Thunk,
+ * and then we've got that customized instance of Axios available in our
+ * action creators. So we will be able to make requests just like we normally
+ * would. Anyways from our action creators but it will be on a preconfigured
+ * Axios instance, so don't have to worry about changing the URL or attaching
+ * cookies or any of that crazy stuff.
+ * */
+
 /*
 export default (req, store) => {
   const content = renderToString(
