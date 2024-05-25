@@ -1119,16 +1119,28 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 // Fetch list of users
 var FETCH_USERS = exports.FETCH_USERS = 'fetch_users';
 
+// This fn gets automatically invoked by Redux Thunk. When Redux Thunk calls this
+// function, it's now going to pass in three separate arguments. The first argument
+// will be the dispatch function, the second argument will be the getState fn and
+// the third is going to be this new little Axios instance that we passed in as
+// third extra argument in client.js
+// Now rathre than refer to it as `axiosInstance` here, which isn't like super
+// clear what that really means, we're renaming this argument to simply be just
+// `api` so that it'll be really clear that we can use this argument right here
+// to get access to our API!
+// So now whenever we make a request inside of our action creator, rather than
+// using the base Axios library, we're going to use this customized Axios instance
+// called api.
 var fetchUsers = exports.fetchUsers = function fetchUsers() {
   return function () {
-    var _ref = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee(dispatch) {
+    var _ref = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee(dispatch, getState, api) {
       var res;
       return regeneratorRuntime.wrap(function _callee$(_context) {
         while (1) {
           switch (_context.prev = _context.next) {
             case 0:
               _context.next = 2;
-              return _axios2.default.get('http://react-ssr-api.herokuapp.com/users');
+              return api.get('/user');
 
             case 2:
               res = _context.sent;
@@ -1147,7 +1159,7 @@ var fetchUsers = exports.fetchUsers = function fetchUsers() {
       }, _callee, undefined);
     }));
 
-    return function (_x) {
+    return function (_x, _x2, _x3) {
       return _ref.apply(this, arguments);
     };
   }();

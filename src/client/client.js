@@ -11,8 +11,13 @@ import { createStore, applyMiddleware } from 'redux';
 import thunk from 'redux-thunk';
 import { Provider } from 'react-redux';
 import { renderRoutes } from 'react-router-config';
+import axios from 'axios';
 import Routes from './Routes';
 import reducers from './reducers';
+
+const axiosInstance = axios.create({
+  baseURL: '/api',
+});
 
 // Now we have initial state from the server side redux state. So now this
 // will create a store with some initial state and then pass it into the React
@@ -26,7 +31,7 @@ import reducers from './reducers';
 const store = createStore(
   reducers,
   window.INITIAL_STATE,
-  applyMiddleware(thunk),
+  applyMiddleware(thunk.withExtraArgument(axiosInstance)),
 );
 
 // Really important distinction here is that, When this code right here is
