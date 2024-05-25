@@ -10,21 +10,39 @@
 // load data definition into our route structure.
 
 import React from 'react';
+import App from './App';
 import HomePage from './pages/HomePage';
 /* import UsersListPage, { loadData } from './pages/UsersListPage'; */
 import UsersListPage from './pages/UsersListPage';
 
+// We always want this App component to be visible and we definitely want any
+// other component that is going to be shown inside of our application to be
+// rendered inside of the App.
+
 export default [
   {
-    ...HomePage,
-    path: '/',
-    // component: HomePage,
-    exact: true,
-  },
-  {
-    ...UsersListPage,
-    // loadData,
-    path: '/users',
-    // component: UsersListPage,
+    ...App,
+    // We did not tie a path to this App component. That means it will always
+    // be displayed on the screen no matter what.
+
+    // Last thing we have to do is, to make sure whenever we match one of these
+    // child routes, they end up getting rendered by the App. So the App component
+    // right there (i.e ...App), is going to be passed the child component
+    // as a property and it's going to be up to the App component to figure out
+    // that it needs to actually render whatever routes got matched as children.
+    routes: [
+      {
+        ...HomePage,
+        path: '/',
+        // component: HomePage,
+        exact: true,
+      },
+      {
+        ...UsersListPage,
+        // loadData,
+        path: '/users',
+        // component: UsersListPage,
+      },
+    ],
   },
 ];

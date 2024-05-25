@@ -28100,6 +28100,10 @@ var _react = __webpack_require__(1);
 
 var _react2 = _interopRequireDefault(_react);
 
+var _App = __webpack_require__(487);
+
+var _App2 = _interopRequireDefault(_App);
+
 var _HomePage = __webpack_require__(485);
 
 var _HomePage2 = _interopRequireDefault(_HomePage);
@@ -28110,14 +28114,28 @@ var _UsersListPage2 = _interopRequireDefault(_UsersListPage);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-exports.default = [_extends({}, _HomePage2.default, {
-  path: '/',
-  // component: HomePage,
-  exact: true
-}), _extends({}, _UsersListPage2.default, {
-  // loadData,
-  path: '/users'
-  // component: UsersListPage,
+// We always want this App component to be visible and we definitely want any
+// other component that is going to be shown inside of our application to be
+// rendered inside of the App.
+
+exports.default = [_extends({}, _App2.default, {
+  // We did not tie a path to this App component. That means it will always
+  // be displayed on the screen no matter what.
+
+  // Last thing we have to do is, to make sure whenever we match one of these
+  // child routes, they end up getting rendered by the App. So the App component
+  // right there (i.e ...App), is going to be passed the child component
+  // as a property and it's going to be up to the App component to figure out
+  // that it needs to actually render whatever routes got matched as children.
+  routes: [_extends({}, _HomePage2.default, {
+    path: '/',
+    // component: HomePage,
+    exact: true
+  }), _extends({}, _UsersListPage2.default, {
+    // loadData,
+    path: '/users'
+    // component: UsersListPage,
+  })]
 })];
 
 /***/ }),
@@ -39961,6 +39979,63 @@ exports.default = {
   // And then, The component that is produced by the connect fn right here
   // will be assigned to a component key.
   component: (0, _reactRedux.connect)(mapStateToProps, { fetchUsers: _actions.fetchUsers })(UsersList)
+};
+
+/***/ }),
+/* 487 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _react = __webpack_require__(1);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _reactRouterConfig = __webpack_require__(479);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+// We're going to call renderRoutes as a function and then into it, we're going
+// to pass in any routes that get mactched during the match routes process, will
+// be passed into the app component as a prop called `route`.
+// So this route right here contains a property on it called `routes` and that is
+// the collection of components that we need to render inside of the App.
+// So now any child routes that are matched will be automatically turned into
+// route components by this renderRoutes function call and basically everything
+// shows up!
+/* @ Root Component */
+
+var App = function App(_ref) {
+  var route = _ref.route;
+
+  return _react2.default.createElement(
+    'div',
+    null,
+    _react2.default.createElement(
+      'h1',
+      { style: { color: 'orangered', fontWeight: 800 } },
+      'Header'
+    ),
+    (0, _reactRouterConfig.renderRoutes)(route.routes)
+  );
+};
+
+// Now even though this is not strictly a page component per se, we're going to
+// have it follow the same convention for exports as our page components because
+// we might want to eventually tie some data loading to this App component.
+// We would want to tie some data loading to this thing if there was some type
+// of action creator or some type of request that we wanted to execute for
+// every single page inside of our application, and we might eventually want to
+// do that. So we're going to export this thing as though it were a page.
+// Now we'll be able to use this thing with same spread syntax inside of our
+// routes file!
+exports.default = {
+  component: App
 };
 
 /***/ })
