@@ -11,6 +11,29 @@ import { renderRoutes } from 'react-router-config';
 import serialize from 'serialize-javascript';
 import Routes from '../client/Routes';
 
+export default (req, store) => {
+  const content = renderToString(
+    <Provider store={store}>
+      <StaticRouter location={req.path} context={{}}>
+        <div>{renderRoutes(Routes)}</div>
+      </StaticRouter>
+    </Provider>,
+  );
+
+  return `
+    <html>
+      <head></head>
+      <body>
+        <div id='root'>${content}</div>
+        <script>
+          window.INITIAL_STATE = ${serialize(store.getState())}
+        </script>
+        <script src='bundle.js'></script>
+      </body>
+    </html>
+  `;
+};
+
 /* Figure out what sets of components to show/render based on URL without
  * rendering the application!
  * Resolution is to use the `react-router-config` lib for SSR!
@@ -271,6 +294,43 @@ import Routes from '../client/Routes';
 //  One is going to be directly sending requests to the API server, the other is
 //  going to be sending requests to the proxy and then on to the API server.
 
+/* @ Renderer to API Communcation */
+// Server is making requests means Axios library inside of the fetchUsers
+// action creator making a request to our API.
+//
+// Approach:
+// So during the initial page load, we need to make sure that Axios inside the
+// fetchUsers action creator while it's running on the render server is going
+// to make a request to this URL:
+// await axios.get('react-ssr-api.herokuapp.com/users')
+//
+// Now after the initial page load process, in other words follow up requests
+// made from the browser, the exact same action creator is now going to be
+// running on the browser.
+// i.e We've got the exact same action creator, the exact same Axios library
+// but it suddenly needs to make a request to a different endpoint, a different
+// URL, and it's going to behave entirely differently because now we don't
+// have to worry about manually attaching any cookie in request. The browser is
+// just going to take care of that for us.
+// await axios.get('/api/users', { cookie: cookie!!! })
+//
+// Conclusion:
+// So what we really want is, we want our action creator and more specifically
+// axios, we want axios to behave slightly differently depending on whether it's
+// running on the client or on the server.
+
+// @ Pseudo code for the above approach (Renderer to API Communication)
+/*
+if ('we are running on server') {
+  // Use axios to make request to this URL
+  const res = await axios.get('react-ssr-api.herokuapp.com/users');
+} else {
+  // Make a request with axios to this URL and send along the cookie
+  const res = await axios.get('/api/users', { cookie: cookie!!! })
+}
+*/
+
+/*
 export default (req, store) => {
   const content = renderToString(
     <Provider store={store}>
@@ -293,3 +353,4 @@ export default (req, store) => {
     </html>
   `;
 };
+*/
