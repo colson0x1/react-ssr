@@ -456,6 +456,28 @@ app.get('*', function (req, res) {
     return route.loadData ? route.loadData(store) : null;
   });
 
+  // @ UnhandledPromiseRejectionWarning
+  // @ Rejection: Request failed with status code 401
+  // We get that error when we disable JavaScript and access the protected
+  // /admins route on the browser.
+  // The reason is how `Promise.all` works:
+  // If one thing goes wrong out of one dozen different requests or one dozen
+  // promises, then Promise.all() no longer calls the .then() statement.
+  // Instead it calls on or it calls a .catch() function instead.
+  // And as of now, we don't have .catch() statement chained to this Promise.all
+  // fn.
+  // So in other words, we have one request in this array of promises that is
+  // failing. The Promise.all statement says, okay, hey, something just went
+  // completely wrong. We need to start to execute some error handling code, but
+  // we don't have a `catch` statement chained on here, which is why we also
+  // start to see that other warning message here:
+  // Something it say, This is an unhandled promise rejection.
+  // In other words, we did not successfully or in any way, shape or form handle
+  // that failed request.
+  // And so that is why our request to our server, like the actual page loading
+  // request, just seems to hang because we kind of exit out of the optimal flow
+  // or the kind of critical path here and we never actually attempt to render
+  // the page and we never actually send any content back to the user.
   Promise.all(promises).then(function () {
     var context = {};
 
