@@ -1745,6 +1745,147 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  * not we need to somehow redirect the user.
  * */
 
+/* @ SEO
+ * If we share a website link in a Twitter's tweet, Twitter automatically looks
+ * at the page that we linked to it and pulls an image to use to represent that
+ * page. It pulls a title and a description and lot more.
+ * That little feature that we see there is something that we'll also see on,
+ * say, Facebook or Linkedin or other link sharing services.
+ * Example: https://x.com/elonmusk/status/1450435645655195649
+ * This feature right there is one of the last things that we need to really
+ * implement inside of our application to help services like Twitter, Google,
+ * LinkedIn, understand what content we are showing on any given page inside
+ * of our application.
+ * If we inspect that page with Element Inspector, right on the <Head> .. </Head>
+ * tag, we will see <meta /> tags there.
+ * Those meta tags has a property of og:title and a content property. The conent
+ * property is the title's description of that page. That is the same title of
+ * the article/tweet as it is displayed over on Twitter in nice looking format.
+ * Similarly we'll find a property of og:description and then content for that
+ * page'ss description which we see in that same twitter's tweet as well.
+ * And another important one is the og:image property with content that has link
+ * to that image, which is the same image we see on that tweet.
+ * So all of those property names of og:something are part of the Open Graph
+ * Protocal (OGP).
+ *
+ * Open Graph Protocal (ogp) - https://ogp.me/
+ * OGP describes how we can set up some of those meta tags on any HTML document
+ * inside of our application to give applications like Facebook, LinkedIn, Google
+ * so on, the ability to parse the content on our page and put together a very
+ * quick description of what our page is all about when it gets linked to one
+ * of those services.
+ * So Essentially, all we really have to do is set up some of those meta tags
+ * inside of our application, and then all those services will parse those
+ * tags and decide exactly how to represent our page.
+ * Now, setting up these tags are bar none, the easiest way to dramatically
+ * improve our SEO inside of our React application and not only SEO as our
+ * page is being indexed by Google, but also the ability for our users to link
+ * to different pages on social services like Facebook and Twitter.
+ *
+ * So we can easily increase the linkability of our application by adding in
+ * some Open Graph meta tags. We want to have the ability to change those meta
+ * tags depending upon the page that the user is visiting inside of our application.
+ * So for example, as the flow really works in the real world, whenever a user
+ * links to say, the root / route or the /users route inside of our application
+ * on some service, that service will have some type of bot running in the
+ * background that will automatically access our page and scrape those meta
+ * tags out of the generated HTML that we send them.
+ * So for each page or for each route inside of our application, we want to have
+ * the ability to configure the tags that are displayed inside the header.
+ * The other thing to keep in mind is that these tags are only accessed by these
+ * bots that scrape our page from the HTML that gets sent from the initial page
+ * request!!
+ * But if we render our application solely as a React App, some of these services
+ * will correctly render our application using React solely on the browser side,
+ * but some others ones will NOT.
+ * So the easiest way to address this is to just make sure that when we generate
+ * our HTML and server, we insert the correct meta tags!!
+ *
+ *
+ * @ Approach - Setting those meta tags inside of our React App:
+ *
+ * To set the tags, we're going to be using a library called React Helmet.
+ * React Helmet is a package maintained by the NFL organization to setup meta
+ * tags and title tags inside of our application.
+ * NFL is the North American football league in America. Anyways, its kind of
+ * the last organization that we would expect to make a library like this but
+ * they are very active in open source development.
+ * The name of the library make a little bit more sense, Helmet being both
+ * the helmet that the players wear and helmet being something that occurs at
+ * like the the top of our HTML document.
+ *
+ * Documentation: https://github.com/nfl/react-helmet
+ *
+ * React Helmet works different for a client side rendered application vs
+ * server side rendered application. The documentation of React Helmet on
+ * GitHub has two distinct sections, one section that shows how to use the
+ * library inside of a normal vanilla client side rendered application. So
+ * on a normal vanilla non server side rendered application, normally we would
+ * just place the <Helmet></Helmet> tag, and inside of it, we would place the
+ * <meta /> tags that we want to set inside of that and then React Helmet will
+ * read those tags, reach up to the header and kind of tweak all the tags
+ * inside the head.
+ *
+ * So if we use Helmet in a normal app, we might have a user or one of those
+ * Twitter bots that scrape our page, visit the users route i.e /users, we
+ * would render that Helmet component, helmet would take those tags and then
+ * it would very manually reach up into the head tag and start to tweak all
+ * the tags inside od there to get them to match up with the ones that we
+ * just tried to render.
+ * So the thing to keep in mind here is that in a normal application, helmet
+ * wants to directly reach up into the Head tag and tweak all the tags inside
+ * of there.
+ *
+ * But our application isn't a normal application, its Server Side Rendered
+ * application. On the documentation of React Helmet, there's a section on
+ * Server Usage.
+ * So on the server helmet works a little bit differently.
+ * Basically, what we're going to do when we use Helmet on the server is to
+ * render our component as usual or render our page as usual. Inside that page,
+ * we will call that or we will place the Helmet tag like how we do on the
+ * client side, but when we render the page on the server, helmet does not
+ * have the ability to reach up to the Head tag and start to manually tweak
+ * some of the tags that are inside there. Because when we render the page
+ * on the server, we have none of those browser APIs around manipulating the
+ * Header in place. And in fact, when we render our application on the server,
+ * we don't even have a Head tag around.
+ * Inside of our renderer.js file here in the helpers directory, we render the
+ * entire React application
+ * (i.e export default (req, store, context) => { const content = renderToString(...) }),
+ * and then we create the head tag later on after that in the `return <html></html`
+ * and dump all the output from our render attempt (i.e ${content}) into that
+ * template.
+ * So right here is where that Helmet tag would be created
+ * (i.e const content = renderToString(...))
+ * And at that point, there is no Head tag. It doesn't exist. So Helmet cannot
+ * reach into the head and set all those tags appropriately.
+ * So instead, we're going to render our <Helmet> tag. Helmet is going to kind
+ * of store all those changes to the <Head> tag that we want to make. And then
+ * after we render our application, we are going to tell Helmet to give us
+ * access to all the tags that it just generated. And we're going to manually
+ * dump all those tags into our HTML template!! i.e (return `<html>...</html>`)
+ *
+ * @ Open Graph Protocal
+ * On the page of Open Graph Protocal, we'll notice that, there are four required
+ * tags whenever we want to use this Open Graph standard! There's a title, type,
+ * image type and a URL.
+ * ie. og:title, og:type, og: image and og:url
+ * For our application, we're just going to worry about setting the title!
+ * One thing to note is, the Open Graph title meta tag is distinctly different
+ * and separate from the page title tag. So a title tag inside of a <head> tag is
+ * used as the title for the tab of the browser. It's the title of the actual
+ * page, and it's separate from the Open Graph title.
+ * Now we're going to set up both the title tag and the Open Graph title tag here
+ * as well.
+ *
+ * @ Approch for our UsersListPage
+ * Whenever a user visits the UsersListPage (i.e /users), we're going to use
+ * the Helmet library to render a tag inside of that component. We'll let helmet
+ * take care of all that rendering. And then after we render our application
+ * the first time around, we will extract all those tags out of helmet and
+ * dump them into our HTML template!!!
+ * */
+
 exports.default = function (req, store, context) {
   var content = (0, _server.renderToString)(_react2.default.createElement(
     _reactRedux.Provider,
