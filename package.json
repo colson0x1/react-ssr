@@ -9,8 +9,12 @@
     "dev:build-server": "webpack --config webpack.server.js --watch",
     "dev:build-client": "webpack --config webpack.client.js --watch"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "COLSON",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/colson0x1/react-ssr.git"
+  },
   "dependencies": {
     "axios": "0.16.2",
     "babel-cli": "6.26.0",
