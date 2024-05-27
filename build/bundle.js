@@ -1341,6 +1341,8 @@ var _reactRedux = __webpack_require__(2);
 
 var _actions = __webpack_require__(1);
 
+var _reactHelmet = __webpack_require__(28);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -1374,12 +1376,29 @@ var UsersList = function (_Component) {
         );
       });
     }
+
+    // Now any time our application gets rendered on the server, Helmet will
+    // inspect the tags that we pass to it and the Helmet library will kind of
+    // internalize or store these two tags. So then inside of our helper
+    // renderer.js file, we can import the Helmet library and extract those tags
+    // out and shove them into our HTML template.
+
   }, {
     key: 'render',
     value: function render() {
       return _react2.default.createElement(
         'div',
         null,
+        _react2.default.createElement(
+          _reactHelmet.Helmet,
+          null,
+          _react2.default.createElement(
+            'title',
+            null,
+            'Users App'
+          ),
+          _react2.default.createElement('meta', { property: 'og:title', content: 'Users App' })
+        ),
         'Big list of users:',
         _react2.default.createElement(
           'ul',
@@ -1679,6 +1698,8 @@ var _serializeJavascript = __webpack_require__(21);
 
 var _serializeJavascript2 = _interopRequireDefault(_serializeJavascript);
 
+var _reactHelmet = __webpack_require__(28);
+
 var _Routes = __webpack_require__(5);
 
 var _Routes2 = _interopRequireDefault(_Routes);
@@ -1886,6 +1907,11 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  * dump them into our HTML template!!!
  * */
 
+// No need to import Home component because Home Component is rendered by the
+// Routes Component
+// This file is going to house a function that will simply render our React
+// app and return it as a string
+
 exports.default = function (req, store, context) {
   var content = (0, _server.renderToString)(_react2.default.createElement(
     _reactRedux.Provider,
@@ -1901,7 +1927,16 @@ exports.default = function (req, store, context) {
     )
   ));
 
-  return '\n    <html>\n      <head>\n        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">\n      </head>\n      <body>\n        <div id=\'root\'>' + content + '</div>\n        <script>\n          window.INITIAL_STATE = ' + (0, _serializeJavascript2.default)(store.getState()) + '\n        </script>\n        <script src=\'bundle.js\'></script>\n      </body>\n    </html>\n  ';
+  // This renderStatic fn returns a little object that represents all the tags
+  // that we loaded inside of the Helmet library in UsersListPage.js
+  var helmet = _reactHelmet.Helmet.renderStatic();
+
+  // If we had multiple meta tags set up, they would all be extracted by this
+  // one function call. So if we also set up a Open Graph tag for the image,
+  // the type, URL, all that kind of stuff, it would all be pulled out by this
+  // one function call!
+  // helmet.meta.toString()
+  return '\n    <html>\n      <head>\n        ' + helmet.title.toString() + '\n        ' + helmet.meta.toString() + '\n        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">\n      </head>\n      <body>\n        <div id=\'root\'>' + content + '</div>\n        <script>\n          window.INITIAL_STATE = ' + (0, _serializeJavascript2.default)(store.getState()) + '\n        </script>\n        <script src=\'bundle.js\'></script>\n      </body>\n    </html>\n  ';
 };
 
 /* Figure out what sets of components to show/render based on URL without
@@ -2301,11 +2336,6 @@ export default (req, store) => {
 };
 */
 
-// No need to import Home component because Home Component is rendered by the
-// Routes Component
-// This file is going to house a function that will simply render our React
-// app and return it as a string
-
 /***/ }),
 /* 20 */
 /***/ (function(module, exports) {
@@ -2581,6 +2611,12 @@ exports.default = function () {
       return state;
   }
 };
+
+/***/ }),
+/* 28 */
+/***/ (function(module, exports) {
+
+module.exports = require("react-helmet");
 
 /***/ })
 /******/ ]);

@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { fetchUsers } from '../actions';
+import { Helmet } from 'react-helmet';
 
 class UsersList extends Component {
   componentDidMount() {
@@ -13,9 +14,19 @@ class UsersList extends Component {
     });
   }
 
+  // Now any time our application gets rendered on the server, Helmet will
+  // inspect the tags that we pass to it and the Helmet library will kind of
+  // internalize or store these two tags. So then inside of our helper
+  // renderer.js file, we can import the Helmet library and extract those tags
+  // out and shove them into our HTML template.
+
   render() {
     return (
       <div>
+        <Helmet>
+          <title>Users App</title>
+          <meta property='og:title' content='Users App' />
+        </Helmet>
         Big list of users:
         <ul>{this.renderUsers()}</ul>
       </div>

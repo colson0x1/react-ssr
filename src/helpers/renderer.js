@@ -9,6 +9,7 @@ import { StaticRouter } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { renderRoutes } from 'react-router-config';
 import serialize from 'serialize-javascript';
+import { Helmet } from 'react-helmet';
 import Routes from '../client/Routes';
 
 /* @ StaticRouter Context
@@ -221,9 +222,20 @@ export default (req, store, context) => {
     </Provider>,
   );
 
+  // This renderStatic fn returns a little object that represents all the tags
+  // that we loaded inside of the Helmet library in UsersListPage.js
+  const helmet = Helmet.renderStatic();
+
+  // If we had multiple meta tags set up, they would all be extracted by this
+  // one function call. So if we also set up a Open Graph tag for the image,
+  // the type, URL, all that kind of stuff, it would all be pulled out by this
+  // one function call!
+  // helmet.meta.toString()
   return `
     <html>
       <head>
+        ${helmet.title.toString()}
+        ${helmet.meta.toString()}
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
       </head>
       <body>
