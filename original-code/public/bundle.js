@@ -2276,8 +2276,37 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
-// Action creator to fetch list of users.
+// Fetch list of users
 var FETCH_USERS = exports.FETCH_USERS = 'fetch_users';
+
+// This fn gets automatically invoked by Redux Thunk. When Redux Thunk calls this
+// function, it's now going to pass in three separate arguments. The first argument
+// will be the dispatch function, the second argument will be the getState fn and
+// the third is going to be this new little Axios instance that we passed in as
+// third extra argument in client.js
+// Now rathre than refer to it as `axiosInstance` here, which isn't like super
+// clear what that really means, we're renaming this argument to simply be just
+// `api` so that it'll be really clear that we can use this argument right here
+// to get access to our API!
+// So now whenever we make a request inside of our action creator, rather than
+// using the base Axios library, we're going to use this customized Axios instance
+// called api.
+
+// So now as long as we make all of our request from our action creator file
+// i.e actions/index.js, as long as we make all of our requests that are
+// expected to go to our API with this `api` argument right here, no matter
+// whether we are on the client or the server, it will always somehow end up
+// making the request to the actual API hosted at Heroku app.
+//
+// NOTE: If we ever end up wanting to make a request to some target that is not
+// our API, we do have to import axios and use essentially a non configured
+// version of Axios.
+// i.e import axios from 'axios';
+// So we would not want to try to use this `api` object here we're receiving.
+// If we wanted to make a request to like some like Instagram API or something
+// like that or Snapchat API.
+// So this copy of Axios right here, this `api` instance is only for use with
+// our API. If we want to access anything else, we use the original axios library!
 var fetchUsers = exports.fetchUsers = function fetchUsers() {
   return function () {
     var _ref = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee(dispatch, getState, api) {
@@ -2349,6 +2378,8 @@ var fetchCurrentUser = exports.fetchCurrentUser = function fetchCurrentUser() {
 };
 
 var FETCH_ADMINS = exports.FETCH_ADMINS = 'fetch_admins';
+// fetchAdmins is going to be an arrow function that returns asynchronous
+// Redux Thunk function which receives three arguments here
 var fetchAdmins = exports.fetchAdmins = function fetchAdmins() {
   return function () {
     var _ref3 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee3(dispatch, getState, api) {
@@ -10188,13 +10219,41 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var axiosInstance = _axios2.default.create({
   baseURL: '/api'
-}); /* @ Startup point for the Client Side Application */
+});
+
+// Now we have initial state from the server side redux state. So now this
+// will create a store with some initial state and then pass it into the React
+// app. So as soon as the UsersListPage component renders, it will reach into
+// the store. It will see that there's already a list of users inside of there
+// and it will attempt to render those onto the screen!
+// That resolves that list item hydration error and also we no longer get a
+// flash  of kind of empty page on the screen because the first time that
+// React renders, it says, Oh hey, here's my list of users already in the
+// Redux state. Fantastic. I'm just going to use these to render myself.
 // This is going to end up as being the route or the entry point of our client
 // side code base.
 
+// @ Startup point for the client side application
+
 var store = (0, _redux.createStore)(_reducers2.default, window.INITIAL_STATE, (0, _redux.applyMiddleware)(_reduxThunk2.default.withExtraArgument(axiosInstance)));
 
-/* @ Hydration */
+// Really important distinction here is that, When this code right here is
+// executed on the browser side, there is already content inside of that div
+// with id of `root`, all the content that we had already rendered into it
+// from the server.
+// So when we call ReactDOM.render(), we are not replacing all the HTML inside
+// there. We are telling React to go back through and set up all those event
+// handlers or all the necessary code that needs to be executed to kind of
+// sort of bind to that existing structure that's on the page!
+
+// This entire process of kind of putting functionality back into the DOM that
+// was already rendered or all the HTML is already rendered, is reffered to as
+// Hydration and if we look at that warning on the console, it actually makes
+// mention of hydate. So the process of kind of rerendering over the once
+// rendered HTML is reffered to as Hydration.
+/* ReactDOM.render(<Home />, document.querySelector('#root')); */
+// Resolve that warning with ReactDOM.hydate to rehydrate our application on the
+// browser.
 _reactDom2.default.hydrate(_react2.default.createElement(
   _reactRedux.Provider,
   { store: store },
@@ -40682,6 +40741,14 @@ Object.defineProperty(exports, "__esModule", {
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; // This is a file that's going to be shared between both the client and the
 // server side codebases.
 
+/* @ Prevent naming collison for loadData fn for multiple pages */
+// Approach:
+// Rather than exporting the component and the load data function separately,
+// we're going to export one single object from each page component file.
+// And in that object we will wrap up both the component and the load data fn!
+// We'll then use our ES2015 spread syntax to dump both the component and the
+// load data definition into our route structure.
+
 /* import UsersListPage, { loadData } from './pages/UsersListPage'; */
 
 
@@ -40711,14 +40778,29 @@ var _AdminsListPage2 = _interopRequireDefault(_AdminsListPage);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+// We always want this App component to be visible and we definitely want any
+// other component that is going to be shown inside of our application to be
+// rendered inside of the App.
+
 exports.default = [_extends({}, _App2.default, {
+  // We did not tie a path to this App component. That means it will always
+  // be displayed on the screen no matter what.
+
+  // Last thing we have to do is, to make sure whenever we match one of these
+  // child routes, they end up getting rendered by the App. So the App component
+  // right there (i.e ...App), is going to be passed the child component
+  // as a property and it's going to be up to the App component to figure out
+  // that it needs to actually render whatever routes got matched as children.
   routes: [_extends({}, _HomePage2.default, {
     path: '/',
+    // component: HomePage,
     exact: true
   }), _extends({}, _AdminsListPage2.default, {
     path: '/admins'
   }), _extends({}, _UsersListPage2.default, {
+    // loadData,
     path: '/users'
+    // component: UsersListPage,
   }), _extends({}, _NotFoundPage2.default)]
 })];
 
@@ -40747,6 +40829,14 @@ var _actions = __webpack_require__(55);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+// We're going to call renderRoutes as a function and then into it, we're going
+// to pass in any routes that get mactched during the match routes process, will
+// be passed into the app component as a prop called `route`.
+// So this route right here contains a property on it called `routes` and that is
+// the collection of components that we need to render inside of the App.
+// So now any child routes that are matched will be automatically turned into
+// route components by this renderRoutes function call and basically everything
+// shows up!
 /* @ Root Component */
 
 var App = function App(_ref) {
@@ -40760,6 +40850,15 @@ var App = function App(_ref) {
   );
 };
 
+// Now even though this is not strictly a page component per se, we're going to
+// have it follow the same convention for exports as our page components because
+// we might want to eventually tie some data loading to this App component.
+// We would want to tie some data loading to this thing if there was some type
+// of action creator or some type of request that we wanted to execute for
+// every single page inside of our application, and we might eventually want to
+// do that. So we're going to export this thing as though it were a page.
+// Now we'll be able to use this thing with same spread syntax inside of our
+// routes file!
 exports.default = {
   component: App,
   loadData: function loadData(_ref2) {
@@ -40789,6 +40888,7 @@ var _reactRedux = __webpack_require__(63);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+// Now Header component should be receiving a prop of auth
 var Header = function Header(_ref) {
   var auth = _ref.auth;
 
@@ -40886,11 +40986,67 @@ var Home = function Home() {
       'Check out these awesome features'
     )
   );
-};
+}; // ES2015 Modules syntax or the `import .. export` syntax
 
 exports.default = {
   component: Home
 };
+
+/* @ Normal React Application
+ * In a normal traditional React application, we would have a JavaScript file
+ * that gets loaded into the browser and that then gets executed. The JS file
+ * would render our JavaScript application, stick it into the DOM and then
+ * attach any related event handlers that we set up inside of the code base.
+ * So with the normal application, we ship down our entire JavaScript bundle
+ * file to the browser and that renders the app and sets up event handlers
+ * inside the browser.
+ *
+ * With this current setup, there's no JavaScript code being set down to the
+ * users browser right now.
+ * We make a request to the root route, the express server sends back the HTML
+ * from that Home component and absolutely nothing else. There's no JS code
+ * that is being loaded into the browser that sets up that event handler for us.
+ * We could check that on the network log in response.
+ * So in order to actually make sure that we get some JavaScript or have our
+ * application work correctly, we need to make sure that we somehow ship down
+ * all the JavaScript code related to our application after we ship down all
+ * this HTML that gets some initial content on the screen.
+ *
+ * So right now in the Server Side world, we are taking care of step number one.
+ * Step number one is getting HTML or getting content to show up on the screen.
+ * Step number two is, however, is to make sure that we then load up our
+ * React application and have the React application set up all the event handlers
+ * and action creators and data loading requests and all that kind of stuff that
+ * we normally want to have occur inside of our application.
+ *
+ * Solution to that Pain Point:
+ * Create two JavaScript bundles using Webpack. One bundle is going to contain
+ * all of our server side and client side code i.e our current setup
+ * webpack.server.js AND now we create another bundle for React app which will
+ * be shipped down to the users browser.
+ * The reason we want to have two bundles is our Server Side bundle and the
+ * Server Side code inside of it might contain sensitive information or sensitive
+ * code. For example, it might contain some secret API keys or special logic
+ * that could somehow be exploited. So there's going to be some amount of code on
+ * our server that we never want to ship down to the browser.
+ * So to implement this, we are going to set up a second Webpack pipeline that's
+ * going to run right along side our current one.
+ */
+
+/*
+import React from 'react';
+
+const Home = () => {
+  return (
+    <div style={{ color: 'dodgerblue' }}>
+      Home Component!!!
+      <button onClick={() => console.log('Hi there!')}>Press me!</button>
+    </div>
+  );
+};
+
+export default Home;
+*/
 
 /***/ }),
 /* 504 */
@@ -40948,6 +41104,26 @@ var UsersList = function (_Component) {
         );
       });
     }
+
+    // Now any time our application gets rendered on the server, Helmet will
+    // inspect the tags that we pass to it and the Helmet library will kind of
+    // internalize or store these two tags. So then inside of our helper
+    // renderer.js file, we can import the Helmet library and extract those tags
+    // out and shove them into our HTML template.
+    // Note: React Helmet expects to see one single expression. But if we pass
+    // content like this:
+    // <title>{this.propr.users.length} Uses Loaded </title>
+    // this content right there, gets converted into JSX, it's going to end up as
+    // two separate expressions. It's one expressoin to pull out the length of
+    // the user's length right there, and then a second for remaining string.
+    // So essentially, React Helmet want to see one single string passed as a
+    // content to the title tag. i.e We need to pass one single child to the
+    // title tag. And if we don't we get this error:
+    // Error: Helmet expects a string as a child of <title>!
+    // So to fix that, we essentially just have to make use of an ES6 template
+    // string inside of our curly braces.
+    // <title>{`${this.props.users.length} Users Loaded`}</title>
+
   }, {
     key: 'head',
     value: function head() {
@@ -40988,12 +41164,23 @@ function mapStateToProps(state) {
 
 function loadData(store) {
   // console.log('Trying to load some data...');
+  // We're going to do a manual dispatch here and we're going to call the
+  // fetchUsers action creator and pass the result into store.dispatch
+  // So now fetchUsers will be called. It will make a network request to the
+  // API and it's going to return a promise representing the network request
+  // to make sure that the promise is created, gets send back to our index.js
+  // file.
+  // So the thing that actually calls loadData, we're going to return the result
+  // of all of this stuff right here.
   return store.dispatch((0, _actions.fetchUsers)());
 }
 
 // export { loadData };
 exports.default = {
+  // We will assign the load data fn to a key of load data
   loadData: loadData,
+  // And then, The component that is produced by the connect fn right here
+  // will be assigned to a component key.
   component: (0, _reactRedux.connect)(mapStateToProps, { fetchUsers: _actions.fetchUsers })(UsersList)
 };
 
@@ -42861,6 +43048,9 @@ var NotFoundPage = function NotFoundPage(_ref) {
   );
 };
 
+// Now this is a Page type component, so we're going to use that alternate
+// export syntax where we export default an object that has a key of component
+// and then a value od the component we just created!
 exports.default = {
   component: NotFoundPage
 };
@@ -42953,7 +43143,22 @@ function mapStateToProps(_ref) {
 }
 
 exports.default = {
+  // We do want to call the action creator from within this component just in
+  // case we ever have a user land on, say, our home route and then navigate
+  // over inside of our application to the admins route. So we'll pass in our
+  // fetchAdmins action creator
+  // Wrap AdminsListPage with requireAuth HOC!
+  // So now we have the initial connect statement that's going to take some
+  // props and try to pass it to this second argument here
+  // i.e requireAuth(AdminsListPage)
+  // So whatever props we get back from mapStateToProps right there or the
+  // connect function to the requireAuth function.
+  // {...this.props} in the requireAuth HOC will be the set of props that gets
+  // passed to the HOC from this connect function here!
   component: (0, _reactRedux.connect)(mapStateToProps, { fetchAdmins: _actions.fetchAdmins })((0, _requireAuth2.default)(AdminsListPage)),
+  // We don't need receive the entire store. All we really care about is the
+  // dispatch function here. With a dispath fn, we will call and pass in the
+  // fetchAdmins action creator.
   loadData: function loadData(_ref2) {
     var dispatch = _ref2.dispatch;
     return dispatch((0, _actions.fetchAdmins)());
@@ -43002,16 +43207,33 @@ exports.default = function (ChildComponent) {
     _createClass(RequireAuth, [{
       key: 'render',
       value: function render() {
+        // this.props.auth is the value produced by our authReducer and there's
+        // three possible values that it can return. It can return false, null and
+        // it can also return an object representing the current user.
+        // Now that object representing the current user is kind of hard to write
+        // into a case statement. So instead we'll just make it the default case.
         switch (this.props.auth) {
           case false:
+            // If the user is definitely not logged in, so if they are definitely
+            // not authenticated, well, in this case, we need to make sure that we
+            // kind of redirect the user to some other location inside of our
+            // application, or at least get them away from the page they're trying
+            // to access.
             return _react2.default.createElement(_reactRouterDom.Redirect, { to: '/' });
           case null:
+            // If auth property is null here, that means we have not yet fetched
+            // the user's authentication state.
             return _react2.default.createElement(
               'div',
               null,
               'Loading...'
             );
           default:
+            // Whenever we create a Higher Order Component, we need to make sure
+            // that we take any of the props that were passed to the Higher Order
+            // Component and pass them through to the Child Component as well.
+            // `{...this.props}` will make sure that any props that are passed to
+            // the HOC are forwarded on to the Child as well.
             return _react2.default.createElement(ChildComponent, this.props);
         }
       }
@@ -43059,6 +43281,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 exports.default = (0, _redux.combineReducers)({
   users: _usersReducer2.default,
   auth: _authReducer2.default,
+  // We'll sign up that reducer (i.e adminsReducer) to the `admins` piece of state
   admins: _adminsReducer2.default
 });
 
