@@ -19,14 +19,32 @@ class UsersList extends Component {
   // internalize or store these two tags. So then inside of our helper
   // renderer.js file, we can import the Helmet library and extract those tags
   // out and shove them into our HTML template.
+  // Note: React Helmet expects to see one single expression. But if we pass
+  // content like this:
+  // <title>{this.propr.users.length} Uses Loaded </title>
+  // this content right there, gets converted into JSX, it's going to end up as
+  // two separate expressions. It's one expressoin to pull out the length of
+  // the user's length right there, and then a second for remaining string.
+  // So essentially, React Helmet want to see one single string passed as a
+  // content to the title tag. i.e We need to pass one single child to the
+  // title tag. And if we don't we get this error:
+  // Error: Helmet expects a string as a child of <title>!
+  // So to fix that, we essentially just have to make use of an ES6 template
+  // string inside of our curly braces.
+  // <title>{`${this.props.users.length} Users Loaded`}</title>
+  head() {
+    return (
+      <Helmet>
+        <title>{`${this.props.users.length} Users Loaded`}</title>
+        <meta property='og:title' content='Users App' />
+      </Helmet>
+    );
+  }
 
   render() {
     return (
       <div>
-        <Helmet>
-          <title>Users App</title>
-          <meta property='og:title' content='Users App' />
-        </Helmet>
+        {this.head()}
         Big list of users:
         <ul>{this.renderUsers()}</ul>
       </div>
